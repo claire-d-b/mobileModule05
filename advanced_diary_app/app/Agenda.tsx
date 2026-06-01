@@ -16,7 +16,7 @@ import CCalendar from "./CCalendar";
 
 registerTranslation("en", en);
 
-const backendUrl = "http://192.168.1.192:3000"
+const backendUrl = "http://192.168.1.39:3000"
 
 const emotions = [
   "emoticon",
@@ -233,6 +233,7 @@ const _ = ({ login }: Props) => {
                           containerColor=""
                           size={20}
                           onPress={() => {}}
+                          disabled={true}
                         />
                         <Text style={{ flex: 1, color: "#353172" }}>
                           {e.title}

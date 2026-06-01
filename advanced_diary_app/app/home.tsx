@@ -23,7 +23,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "http://192.168.1.39:3000";
 
 interface Entry {
   id: number;
@@ -372,10 +372,16 @@ const Home = () => {
                     </View>
                     <CIconButton
                       icon={emotions[(e.feeling ?? 1) - 1]}
-                      iconColor="#534DB3"
-                      containerColor=""
+                      iconColor="white"
+                      containerColor="transparent"
                       size={20}
                       onPress={() => {}}
+                      disabled={true}
+                      theme={{
+                        colors: {
+                          onSurfaceDisabled: "white",  // ← couleur de l'icône quand disabled
+                        }
+                      }}
                     />
                     {/* <Text numberOfLines={1} ellipsizeMode="tail" style={{ flex: 1, color: "#353172"  }}>{e.content}</Text> */}
                     <Text style={{ flex: 1, color: "#353172" }}>{e.title}</Text>

@@ -12,9 +12,11 @@ interface Props {
   containerColor: string;
   size: number;
   onPress: (e: GestureResponderEvent) => void;
+  disabled?: boolean;
+  theme?: {};
 }
 
-const CIconButton = ({ style, mode, icon, iconColor, containerColor,  size, onPress }: Props) => (
+const CIconButton = ({ style, mode, icon, iconColor, containerColor,  size, onPress, disabled, theme }: Props) => (
   <IconButton
     style={style}
     mode={mode}
@@ -23,6 +25,8 @@ const CIconButton = ({ style, mode, icon, iconColor, containerColor,  size, onPr
     containerColor={containerColor}
     size={size}
     onPress={onPress}
+    disabled={disabled}
+    theme={theme}
   />
 );
 
