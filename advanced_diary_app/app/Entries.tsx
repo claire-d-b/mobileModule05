@@ -26,7 +26,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "http://192.168.1.39:3000";
 
 interface Entry {
   id: number;
@@ -223,27 +223,10 @@ const _ = () => {
         justifyContent: "space-around",
       }}
     >
-      <View
-        style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <CAvatar
-          size={80}
-          icon="account"
-          color="white"
-          style={{ backgroundColor: "#534DB3" }}
-        />
-        <Text style={{ padding: 10, color: "#353172" }}>{email}</Text>
-      </View>
-      {/* <Text style={{ color: "#353172", padding: 10 }}>
+      <Text style={{ color: "#353172", padding: 40 }}>
         Add a new entry to your diary by clicking Add entry. You can click on a
         specific entry in the below list to get details.
-      </Text> */}
+      </Text>
       <CModal
         visible={visible}
         hideModal={hideModal}
@@ -482,7 +465,7 @@ const _ = () => {
                                 mode="outlined"
                                 icon=""
                                 disabled={true}
-                                textStyle={{}}
+                                textStyle={{ color: "#534DB3" }}
                                 style={{
                                   borderColor: "#534DB3", // ← directement dans style
                                   borderWidth: 1,
@@ -532,7 +515,9 @@ const _ = () => {
                                 </Text>
                               </CChip>
                             </View>
-                            <Text style={{ color: "#534DB3" }}>
+                            <Text
+                              style={{ color: "#534DB3", paddingVertical: 20 }}
+                            >
                               {selectedEntry?.content}
                             </Text>
                           </View>

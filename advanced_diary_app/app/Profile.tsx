@@ -30,7 +30,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "http://192.168.1.39:3000";
 
 interface Entry {
   id: number;
@@ -461,7 +461,6 @@ const Profile = ({ login }: Props) => {
                         mode="outlined"
                         textStyle={{ color: "#534DB3" }}
                         style={{}}
-                        buttonColor="#534DB3"
                         icon=""
                         disabled={true}
                       >

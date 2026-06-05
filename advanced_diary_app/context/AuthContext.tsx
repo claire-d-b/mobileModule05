@@ -30,15 +30,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const auth = getAuth();
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log("🔥 Auth state changed:", user?.email ?? null);
       if (user?.email) {
         console.log("🔥 Firebase user detected:", user.email);
-
         setLocalLoginState(user.email);
         await AsyncStorage.setItem("localLogin", user.email);
-      } else {
-        setLocalLoginState(null);
-        await AsyncStorage.removeItem("localLogin");
       }
+      // ← ne rien faire si user est null, AsyncStorage garde le localLogin local
     });
 
     return unsubscribe;

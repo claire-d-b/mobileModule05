@@ -15,7 +15,6 @@ interface Props {
   mode: "flat" | "outlined";
   textStyle: StyleProp<TextStyle>;
   style: Animated.WithAnimatedValue<StyleProp<ViewStyle>>;
-  buttonColor?: string;
   children: React.ReactNode;
   icon: string;
   disabled: boolean | undefined;
@@ -26,6 +25,8 @@ const CChip = ({
   onPress,
   label,
   mode,
+  textStyle,
+  style,
   children,
   icon,
   disabled,
@@ -34,6 +35,8 @@ const CChip = ({
     theme={theme}
     icon={icon}
     mode={mode}
+    textStyle={textStyle}
+    style={style}
     onPress={() => console.log("Pressed")}
     accessibilityLabel={label}
     disabled={disabled}
