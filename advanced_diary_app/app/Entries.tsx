@@ -507,11 +507,21 @@ const _ = () => {
                                 label=""
                                 mode="flat"
                                 textStyle={{ color: "white" }}
-                                style={{ backgroundColor: "#BBB0D1" }}
+                                style={{
+                                  flex: 1,
+                                  backgroundColor: "#BBB0D1",
+                                }}
                                 icon=""
                                 disabled={true}
                               >
-                                <Text style={{ color: "#534DB3" }}>
+                                <Text
+                                  style={{
+                                    flex: 1,
+                                    color: "#353172",
+                                  }}
+                                  numberOfLines={1}
+                                  ellipsizeMode="tail"
+                                >
                                   {selectedEntry?.title}
                                 </Text>
                               </CChip>

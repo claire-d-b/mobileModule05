@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Platform } from "react-native";
+import { View, Text, Platform, Pressable } from "react-native";
 import { Button, IconButton, PaperProvider } from "react-native-paper";
 import {
   DatePickerModal,
@@ -174,12 +174,11 @@ const _ = ({ login }: Props) => {
                     alignItems: "center",
                   }}
                 >
-                  <CTouchableRipple
+                  <Pressable
                     onPress={() => {
                       setSelectedEntry(e); // ← stocke l'entrée
                       showModal(); // ← ouvre la modal
                     }}
-                    rippleColor="rgba(0, 0, 0, .32)"
                   >
                     <View
                       key={`touchable_${i}`}
@@ -222,22 +221,25 @@ const _ = ({ login }: Props) => {
                         size={20}
                         onPress={() => {}}
                         disabled={true}
-                      />
-                      <Text style={{ flex: 1, color: "#353172" }}>
-                        {e.title}
-                      </Text>
-                      <CIconButton
-                        style={{ alignSelf: "flex-end" }}
-                        icon="close"
-                        iconColor="#534DB3"
-                        containerColor=""
-                        size={20}
-                        onPress={() => {
-                          deleteEntry(e.id);
+                        theme={{
+                          colors: {
+                            onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
+                          },
                         }}
                       />
+                      <Text
+                        style={{
+                          flex: 1,
+                          color: "#353172",
+                          paddingRight: 5,
+                        }}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {e.title}
+                      </Text>
                     </View>
-                  </CTouchableRipple>
+                  </Pressable>
                 </View>
               </View>
             );
