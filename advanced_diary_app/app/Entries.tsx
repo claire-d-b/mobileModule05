@@ -221,6 +221,7 @@ const _ = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "space-around",
+        backgroundColor: "white",
       }}
     >
       <Text style={{ color: "#353172", padding: 40 }}>
