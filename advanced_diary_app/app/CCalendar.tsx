@@ -1,5 +1,11 @@
 import { useEffect } from "react";
 import { Calendar } from "react-native-calendars";
+import { Dimensions } from "react-native";
+
+const width = Math.min(
+  Dimensions.get("window").width - 50,
+  Dimensions.get("window").height - 50,
+);
 
 interface Props {
   page: number;
@@ -19,7 +25,11 @@ const _ = ({ page, date, setDate, fetchEntriesByDate }: Props) => {
   }, [page, date]);
   return (
     <Calendar
-      style={{ width: "100%", borderRadius: 10, marginBottom: 10 }}
+      style={{
+        borderRadius: 10,
+        marginBottom: 10,
+        width,
+      }}
       theme={{
         backgroundColor: "#ffffff",
         calendarBackground: "#ffffff",

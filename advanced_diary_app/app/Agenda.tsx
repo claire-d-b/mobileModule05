@@ -131,11 +131,11 @@ const _ = ({ login }: Props) => {
   };
 
   return (
-    <>
+    <View style={{ width: "100%" }}>
       <View
         style={{
           display: "flex",
-          flex: 1,
+          width: "100%",
           justifyContent: "flex-start",
           alignItems: "center",
           padding: 20,
@@ -158,7 +158,7 @@ const _ = ({ login }: Props) => {
                   flexDirection: "row",
                   // marginHorizontal: 20,
                   margin: 5,
-                  marginHorizontal: 20,
+                  // marginHorizontal: 20,
                   padding: 5,
                   justifyContent: "center",
                   alignItems: "center",
@@ -360,7 +360,7 @@ const _ = ({ login }: Props) => {
           alignItems: "center",
         }}
       ></View>
-    </>
+    </View>
   );
 };
 

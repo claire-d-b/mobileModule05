@@ -1,4 +1,4 @@
-package com.clairedb.diary_app
+package com.clairedb.myapp
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
