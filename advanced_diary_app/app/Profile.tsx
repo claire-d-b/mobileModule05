@@ -30,7 +30,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.39:3000"
+const backendUrl = "http://192.168.1.192:3000";
 
 interface Entry {
   id: number;
@@ -566,8 +566,6 @@ const Profile = ({ login }: Props) => {
               hideModal={hideModal}
               showModal={showModal}
               style={{ width: "100%", height: "100%" }}
-              button={true}
-              content="Add a diary entry or click outside this area to dismiss."
             >
               <View style={{ width: "100%", alignSelf: "flex-start" }}>
                 <CTextInput

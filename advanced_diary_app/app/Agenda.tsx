@@ -16,7 +16,7 @@ import CCalendar from "./CCalendar";
 
 registerTranslation("en", en);
 
-const backendUrl = "http://192.168.1.39:3000"
+const backendUrl = "http://192.168.1.192:3000";
 
 const emotions = [
   "emoticon",
@@ -131,266 +131,237 @@ const _ = ({ login }: Props) => {
   };
 
   return (
-    <SafeAreaView
-      style={{ display: "flex", flex: 1 }}
-      edges={["top", "bottom", "left", "right"]}
-    >
-      <PaperProvider>
-        <View
-          style={{
-            display: "flex",
-            flex: 1,
-            justifyContent: "flex-start",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          {/* <Button
-            onPress={() => setOpen(true)}
-            uppercase={false}
-            mode="outlined"
-          >
-            Pick single date
-          </Button> */}
-          <CCalendar
-            page={page}
-            date={date ?? new Date()}
-            setDate={setDate}
-            fetchEntriesByDate={fetchEntriesByDate}
-          />
-          {(entries &&
-            entries.length > 0 &&
-            entries.map((e, i) => {
-              return (
+    <>
+      <View
+        style={{
+          display: "flex",
+          flex: 1,
+          justifyContent: "flex-start",
+          alignItems: "center",
+          padding: 20,
+        }}
+      >
+        <CCalendar
+          page={page}
+          date={date ?? new Date()}
+          setDate={setDate}
+          fetchEntriesByDate={fetchEntriesByDate}
+        />
+        {(entries &&
+          entries.length > 0 &&
+          entries.map((e, i) => {
+            return (
+              <View
+                key={`entry_agenda_${i}`}
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  // marginHorizontal: 20,
+                  margin: 5,
+                  marginHorizontal: 20,
+                  padding: 5,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#BBB0D1",
+                  borderRadius: 10,
+                }}
+              >
                 <View
-                  key={`entry_agenda_${i}`}
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <CTouchableRipple
+                    onPress={() => {
+                      setSelectedEntry(e); // ← stocke l'entrée
+                      showModal(); // ← ouvre la modal
+                    }}
+                    rippleColor="rgba(0, 0, 0, .32)"
+                  >
+                    <View
+                      key={`touchable_${i}`}
+                      style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: "white",
+                          borderRadius: 10,
+                          margin: 5,
+                        }}
+                      >
+                        <CChip
+                          theme={{
+                            colors: {
+                              surfaceDisabled: "#BBB0D1",
+                              onSurfaceDisabled: "#534DB3",
+                            } as any,
+                          }}
+                          onPress={() => {}}
+                          label=""
+                          mode="outlined"
+                          style={{ padding: 5 }}
+                          textStyle={{ color: "#534DB3" }}
+                          buttonColor="#534DB3"
+                          icon=""
+                          disabled={true}
+                        >
+                          <Text>{formatDateFR(new Date(e.created_at))}</Text>
+                        </CChip>
+                      </View>
+                      <CIconButton
+                        icon={emotions[(e.feeling ?? 3) - 1]}
+                        iconColor="#534DB3"
+                        containerColor=""
+                        size={20}
+                        onPress={() => {}}
+                        disabled={true}
+                      />
+                      <Text style={{ flex: 1, color: "#353172" }}>
+                        {e.title}
+                      </Text>
+                      <CIconButton
+                        style={{ alignSelf: "flex-end" }}
+                        icon="close"
+                        iconColor="#534DB3"
+                        containerColor=""
+                        size={20}
+                        onPress={() => {
+                          deleteEntry(e.id);
+                        }}
+                      />
+                    </View>
+                  </CTouchableRipple>
+                </View>
+              </View>
+            );
+          })) || <Text style={{ color: "#353172" }}>No entry found</Text>}
+        {selectedEntry && (
+          <CModal
+            visible={visible}
+            hideModal={hideModal}
+            showModal={showModal}
+            style={{}}
+            children={
+              <View style={{ gap: 8 }}>
+                <View
                   style={{
                     display: "flex",
                     flexDirection: "row",
-                    // marginHorizontal: 20,
-                    margin: 5,
-                    marginHorizontal: 20,
-                    padding: 5,
-                    justifyContent: "center",
+                    justifyContent: "flex-start",
                     alignItems: "center",
-                    backgroundColor: "#BBB0D1",
-                    borderRadius: 10,
+                    gap: 8,
                   }}
                 >
-                  <View
-                    style={{
-                      width: "100%",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
+                  <CChip
+                    theme={{
+                      colors: {
+                        surfaceDisabled: "#BBB0D1",
+                        onSurfaceDisabled: "#534DB3",
+                      } as any,
                     }}
+                    onPress={() => {}}
+                    label=""
+                    mode="flat"
+                    textStyle={{ color: "#534DB3" }}
+                    style={{}}
+                    buttonColor="#534DB3"
+                    icon=""
+                    disabled={true}
                   >
-                    <CTouchableRipple
-                      onPress={() => {
-                        setSelectedEntry(e); // ← stocke l'entrée
-                        showModal(); // ← ouvre la modal
-                      }}
-                      rippleColor="rgba(0, 0, 0, .32)"
-                    >
-                      <View
-                        key={`touchable_${i}`}
-                        style={{
-                          width: "100%",
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <View
-                          style={{
-                            backgroundColor: "white",
-                            borderRadius: 10,
-                            margin: 5,
-                          }}
-                        >
-                          <CChip
-                            theme={{
-                              colors: {
-                                surfaceDisabled: "#BBB0D1",
-                                onSurfaceDisabled: "#534DB3",
-                              } as any,
-                            }}
-                            onPress={() => {}}
-                            label=""
-                            mode="outlined"
-                            style={{ padding: 5 }}
-                            textStyle={{ color: "#534DB3" }}
-                            buttonColor="#534DB3"
-                            icon=""
-                            disabled={true}
-                          >
-                            <Text>{formatDateFR(new Date(e.created_at))}</Text>
-                          </CChip>
-                        </View>
-                        <CIconButton
-                          icon={emotions[(e.feeling ?? 3) - 1]}
-                          iconColor="#534DB3"
-                          containerColor=""
-                          size={20}
-                          onPress={() => {}}
-                          disabled={true}
-                        />
-                        <Text style={{ flex: 1, color: "#353172" }}>
-                          {e.title}
-                        </Text>
-                        <CIconButton
-                          style={{ alignSelf: "flex-end" }}
-                          icon="close"
-                          iconColor="#534DB3"
-                          containerColor=""
-                          size={20}
-                          onPress={() => {
-                            deleteEntry(e.id);
-                          }}
-                        />
-                      </View>
-                    </CTouchableRipple>
-                  </View>
+                    <>
+                      <Text style={{ color: "gray" }}>date: </Text>
+                      <Text>
+                        {formatDateFR(new Date(selectedEntry?.created_at))}
+                      </Text>
+                    </>
+                  </CChip>
+                  <CIconButton
+                    style={{
+                      backgroundColor: "rgba(229, 231, 235)",
+                    }}
+                    mode="contained"
+                    icon={emotions[(selectedEntry?.feeling ?? 3) - 1]}
+                    iconColor="#534DB3"
+                    containerColor=""
+                    size={18}
+                    onPress={() => {}}
+                  />
+                  <CChip
+                    theme={{
+                      colors: {
+                        surfaceDisabled: "#BBB0D1",
+                        onSurfaceDisabled: "#534DB3",
+                      } as any,
+                    }}
+                    onPress={() => {}}
+                    label=""
+                    mode="flat"
+                    textStyle={{ color: "#534DB3" }}
+                    style={{}}
+                    buttonColor="#534DB3"
+                    icon=""
+                    disabled={true}
+                  >
+                    <>
+                      <Text style={{ color: "gray" }}>title: </Text>
+                      <Text>{selectedEntry.title}</Text>
+                    </>
+                  </CChip>
                 </View>
-              );
-            })) || <Text style={{ color: "#353172" }}>No entry found</Text>}
-          {selectedEntry && (
-            <CModal
-              visible={visible}
-              hideModal={hideModal}
-              showModal={showModal}
-              style={{}}
-              children={
-                <View style={{ gap: 8 }}>
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <CChip
-                      theme={{
-                        colors: {
-                          surfaceDisabled: "#BBB0D1",
-                          onSurfaceDisabled: "#534DB3",
-                        } as any,
-                      }}
-                      onPress={() => {}}
-                      label=""
-                      mode="flat"
-                      textStyle={{ color: "#534DB3" }}
-                      style={{}}
-                      buttonColor="#534DB3"
-                      icon=""
-                      disabled={true}
-                    >
-                      <>
-                        <Text style={{ color: "gray" }}>date: </Text>
-                        <Text>
-                          {formatDateFR(new Date(selectedEntry?.created_at))}
-                        </Text>
-                      </>
-                    </CChip>
-                    <CIconButton
-                      style={{
-                        backgroundColor: "rgba(229, 231, 235)",
-                      }}
-                      mode="contained"
-                      icon={emotions[(selectedEntry?.feeling ?? 3) - 1]}
-                      iconColor="#534DB3"
-                      containerColor=""
-                      size={18}
-                      onPress={() => {}}
-                    />
-                    <CChip
-                      theme={{
-                        colors: {
-                          surfaceDisabled: "#BBB0D1",
-                          onSurfaceDisabled: "#534DB3",
-                        } as any,
-                      }}
-                      onPress={() => {}}
-                      label=""
-                      mode="flat"
-                      textStyle={{ color: "#534DB3" }}
-                      style={{}}
-                      buttonColor="#534DB3"
-                      icon=""
-                      disabled={true}
-                    >
-                      <>
-                        <Text style={{ color: "gray" }}>title: </Text>
-                        <Text>{selectedEntry.title}</Text>
-                      </>
-                    </CChip>
-                  </View>
-                  <View
-                    style={{
-                      display: "flex",
-                      width: "100%",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <CTextInput
-                      secureTextEntry={false}
-                      right={<></>}
-                      onBlur={() => {}}
-                      onChangeText={() => {}}
-                      label="Content"
-                      msg={selectedEntry?.content ?? ""}
-                      placeholder=""
-                      variant="outlined"
-                      textColor="#534DB3"
-                      outlineColor="#534DB3"
-                      outlineStyle={{ borderRadius: 10 }}
-                      activeOutlineColor="#534DB3"
-                      underlineColor="#534DB3"
-                      activeUnderlineColor="#534DB3"
-                      selectionColor="#534DB3"
-                      contentStyle={{}}
-                      style={{ flex: 1 }}
-                      disabled={true}
-                      multiline={true}
-                    />
-                  </View>
+                <View
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <CTextInput
+                    secureTextEntry={false}
+                    right={<></>}
+                    onBlur={() => {}}
+                    onChangeText={() => {}}
+                    label="Content"
+                    msg={selectedEntry?.content ?? ""}
+                    placeholder=""
+                    variant="outlined"
+                    textColor="#534DB3"
+                    outlineColor="#534DB3"
+                    outlineStyle={{ borderRadius: 10 }}
+                    activeOutlineColor="#534DB3"
+                    underlineColor="#534DB3"
+                    activeUnderlineColor="#534DB3"
+                    selectionColor="#534DB3"
+                    contentStyle={{}}
+                    style={{ flex: 1 }}
+                    disabled={true}
+                    multiline={true}
+                  />
                 </View>
-              }
-              button={false}
-              content=""
-            />
-          )}
-        </View>
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-around",
-            alignItems: "center",
-          }}
-        >
-          <CIconButton
-            icon="chevron-left"
-            iconColor="#534DB3"
-            containerColor=""
-            size={25}
-            onPress={loadLess}
+              </View>
+            }
           />
-          <CIconButton
-            icon="chevron-right"
-            iconColor="#534DB3"
-            containerColor=""
-            size={25}
-            onPress={loadMore}
-          />
-        </View>
-      </PaperProvider>
-    </SafeAreaView>
+        )}
+      </View>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-around",
+          alignItems: "center",
+        }}
+      ></View>
+    </>
   );
 };
 

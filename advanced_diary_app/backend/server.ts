@@ -210,12 +210,17 @@ app.post(
       const emailsRes = await fetch("https://api.github.com/user/emails", {
         headers: { Authorization: `Bearer ${data.access_token}` },
       });
-      const emails = await emailsRes.json() as { email: string; primary: boolean }[];
-      const login = emails.filter(e => e.primary === true).map(e => e.email)[0];
+      const emails = (await emailsRes.json()) as {
+        email: string;
+        primary: boolean;
+      }[];
+      const login = emails
+        .filter((e) => e.primary === true)
+        .map((e) => e.email)[0];
 
-      const profile = await fetch("https://api.github.com/user", {
+      const profile = (await fetch("https://api.github.com/user", {
         headers: { Authorization: `Bearer ${data.access_token}` },
-      }).then(r => r.json()) as GithubProfile;
+      }).then((r) => r.json())) as GithubProfile;
 
       const result = await pool.query(
         `INSERT INTO users (login, provider, provider_id, created_at)

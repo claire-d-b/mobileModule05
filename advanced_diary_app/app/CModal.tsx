@@ -23,8 +23,6 @@ interface Props {
   showModal: () => void;
   style: StyleProp<ViewStyle>;
   children: React.ReactNode;
-  button: boolean;
-  content: string;
 }
 const CModal = ({
   type,
@@ -34,8 +32,6 @@ const CModal = ({
   showModal,
   style,
   children,
-  button,
-  content,
 }: Props) => {
   const containerStyle = {
     backgroundColor: "white",
@@ -99,20 +95,20 @@ const CModal = ({
                 </>
               )) || <></>}
           </View>
-          <Text style={{ color: "#353172" }}>{content}</Text>
+          <Text style={{ color: "#353172" }}>
+            Add a diary entry or click outside this area to dismiss.
+          </Text>
         </Modal>
       </Portal>
-      {button && (
-        <CButton
-          msg="Add entry"
-          variant="contained"
-          textColor="white"
-          labelStyle=""
-          style={{ marginHorizontal: 20, alignSelf: "flex-end" }}
-          buttonColor="#534DB3"
-          onPress={showModal}
-        />
-      )}
+      <CButton
+        msg={"Add entry"}
+        variant="contained"
+        textColor="white"
+        labelStyle=""
+        style={{ marginTop: 10, marginRight: 30, alignSelf: "flex-end" }}
+        buttonColor="#534DB3"
+        onPress={showModal}
+      />
     </>
   );
 };

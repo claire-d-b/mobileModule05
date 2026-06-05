@@ -1,35 +1,30 @@
 import * as React from "react";
+import type { ReactNode, Dispatch, SetStateAction } from "react";
 import { BottomNavigation, Text } from "react-native-paper";
 import { useAuthContext } from "../context/AuthContext";
 import Profile from "./Profile";
 import Agenda from "./Agenda";
 
+// Définis le type manuellement
+type Route = {
+  key: string;
+  title?: string;
+  focusedIcon?: string;
+  unfocusedIcon?: string;
+};
+
 interface Props {
   style: {};
+  index: number;
+  setIndex: Dispatch<SetStateAction<number>>;
+  routes: Route[];
+  renderScene: (props: {
+    route: Route;
+    jumpTo: (key: string) => void;
+  }) => ReactNode;
 }
 
-const _ = ({ style }: Props) => {
-  const { localLogin } = useAuthContext();
-
-  const ProfileRoute = () => <Profile login={localLogin} />;
-  const AgendaRoute = () => <Agenda login={localLogin} />;
-
-  const [index, setIndex] = React.useState(0);
-  const [routes] = React.useState([
-    {
-      key: "profile",
-      title: "Profile",
-      focusedIcon: "account",
-      unfocusedIcon: "account-outline",
-    },
-    { key: "agenda", title: "Agenda", focusedIcon: "calendar" },
-  ]);
-
-  const renderScene = BottomNavigation.SceneMap({
-    profile: ProfileRoute,
-    agenda: AgendaRoute,
-  });
-
+const _ = ({ style, index, setIndex, routes, renderScene }: Props) => {
   return (
     <BottomNavigation
       style={style}
