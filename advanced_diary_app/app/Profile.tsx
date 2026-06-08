@@ -317,7 +317,7 @@ const Profile = ({ login }: Props) => {
                     icon=""
                     disabled={true}
                   >
-                    {formatDateFR(new Date(e.created_at))}
+                    {formatDateFR(new Date(e.date))}
                   </CChip>
                 </View>
                 <CIconButton

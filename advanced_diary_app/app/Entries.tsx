@@ -379,7 +379,7 @@ const _ = () => {
                     disabled={true}
                   >
                     <Text style={{ color: "#534DB3" }}>
-                      {formatDate(e.created_at)}
+                      {formatDate(e.date)}
                     </Text>
                   </CChip>
                 </View>
@@ -474,7 +474,7 @@ const _ = () => {
                               >
                                 <Text style={{ color: "#534DB3" }}>
                                   {formatDate(
-                                    selectedEntry?.created_at ??
+                                    selectedEntry?.date ??
                                       formatDate(
                                         new Date().toLocaleDateString(),
                                       ),

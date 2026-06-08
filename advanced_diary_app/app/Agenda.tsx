@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, Platform, Pressable } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, Platform, Pressable, ScrollView } from "react-native";
 import { Button, IconButton, PaperProvider } from "react-native-paper";
 import {
   DatePickerModal,
@@ -76,6 +76,7 @@ const _ = ({ login }: Props) => {
       if (!res.ok) return;
 
       setEntries(data.entries ?? []);
+      console.log(data.entries.length);
       setTotalPages(data.totalPages ?? 0);
       setPage(data.page ?? 0);
     } catch (err) {
@@ -83,283 +84,132 @@ const _ = ({ login }: Props) => {
     }
   };
 
-  const loadMore = async () => {
-    if (page + 1 < totalPages) {
-      const nextPage = page + 1;
-      await fetchEntriesByDate(date ?? new Date(), nextPage);
-      // setPage(nextPage);
-    }
-  };
-
-  const loadLess = async () => {
-    if (page > 0) {
-      const nextPage = page - 1;
-      await fetchEntriesByDate(date ?? new Date(), nextPage);
-      // setPage(nextPage);
-    }
-  };
-
   const [visible, setVisible] = React.useState(false);
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
-  const deleteEntry = async (id: number) => {
-    try {
-      const res = await fetch(`${backendUrl}/entries/${id}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        console.error("❌ Failed to delete entry:", data.error);
-        return;
-      }
-      console.log("✅ Entry deleted:", data.entry);
-      if (date) await fetchEntriesByDate(date);
-    } catch (err) {
-      console.error("❌ Error deleting entry:", err);
-    }
-  };
-
-  const onDismissSingle = React.useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
-
-  const onConfirmSingle = (params: { date: Date | undefined }) => {
-    setOpen(false);
-    setDate(params.date);
-    if (params.date) fetchEntriesByDate(params.date); // ← ici
-  };
+  useEffect(() => {
+    fetchEntriesByDate(date ?? new Date(), page);
+    // setDate(date);
+  }, [page, date]);
 
   return (
-    <View style={{ width: "100%" }}>
+    <View style={{ width: "100%", flex: 1 }}>
       <View
         style={{
           display: "flex",
           width: "100%",
+          flex: 1,
           justifyContent: "flex-start",
           alignItems: "center",
           padding: 20,
         }}
       >
-        <CCalendar
-          page={page}
-          date={date ?? new Date()}
-          setDate={setDate}
-          fetchEntriesByDate={fetchEntriesByDate}
-        />
-        {(entries &&
-          entries.length > 0 &&
-          entries.map((e, i) => {
-            return (
-              <View
-                key={`entry_agenda_${i}`}
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  // marginHorizontal: 20,
-                  margin: 5,
-                  // marginHorizontal: 20,
-                  padding: 5,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: "#BBB0D1",
-                  borderRadius: 10,
-                }}
-              >
+        <CCalendar page={page} date={date ?? new Date()} setDate={setDate} />
+        <ScrollView style={{ width: "100%", flex: 1 }}>
+          {(entries &&
+            entries.length > 0 &&
+            entries.map((e, i) => {
+              return (
                 <View
+                  key={`entry_agenda_${i}`}
                   style={{
-                    width: "100%",
+                    display: "flex",
                     flexDirection: "row",
+                    // marginHorizontal: 20,
+                    margin: 5,
+                    // marginHorizontal: 20,
+                    padding: 5,
                     justifyContent: "center",
                     alignItems: "center",
+                    backgroundColor: "#BBB0D1",
+                    borderRadius: 10,
                   }}
                 >
-                  <Pressable
-                    onPress={() => {
-                      setSelectedEntry(e); // ← stocke l'entrée
-                      showModal(); // ← ouvre la modal
+                  <View
+                    style={{
+                      width: "100%",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
-                    <View
-                      key={`touchable_${i}`}
-                      style={{
-                        width: "100%",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                    <Pressable
+                      onPress={() => {
+                        setSelectedEntry(e); // ← stocke l'entrée
+                        showModal(); // ← ouvre la modal
                       }}
                     >
                       <View
+                        key={`touchable_${i}`}
                         style={{
-                          backgroundColor: "white",
-                          borderRadius: 10,
-                          margin: 5,
+                          width: "100%",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
                         }}
                       >
-                        <CChip
+                        <View
+                          style={{
+                            backgroundColor: "white",
+                            borderRadius: 10,
+                            margin: 5,
+                          }}
+                        >
+                          <CChip
+                            theme={{
+                              colors: {
+                                surfaceDisabled: "#BBB0D1",
+                                onSurfaceDisabled: "#534DB3",
+                              } as any,
+                            }}
+                            onPress={() => {}}
+                            label=""
+                            mode="outlined"
+                            style={{ padding: 5 }}
+                            textStyle={{ color: "#534DB3" }}
+                            icon=""
+                            disabled={true}
+                          >
+                            <Text>{formatDateFR(new Date(e.date))}</Text>
+                          </CChip>
+                        </View>
+                        <CIconButton
+                          icon={emotions[(e.feeling ?? 3) - 1]}
+                          iconColor="#534DB3"
+                          containerColor=""
+                          size={20}
+                          onPress={() => {}}
+                          disabled={true}
                           theme={{
                             colors: {
-                              surfaceDisabled: "#BBB0D1",
-                              onSurfaceDisabled: "#534DB3",
-                            } as any,
+                              onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
+                            },
                           }}
-                          onPress={() => {}}
-                          label=""
-                          mode="outlined"
-                          style={{ padding: 5 }}
-                          textStyle={{ color: "#534DB3" }}
-                          icon=""
-                          disabled={true}
+                        />
+                        <Text
+                          style={{
+                            flex: 1,
+                            color: "#353172",
+                            paddingRight: 5,
+                          }}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
                         >
-                          <Text>{formatDateFR(new Date(e.created_at))}</Text>
-                        </CChip>
+                          {e.title}
+                        </Text>
                       </View>
-                      <CIconButton
-                        icon={emotions[(e.feeling ?? 3) - 1]}
-                        iconColor="#534DB3"
-                        containerColor=""
-                        size={20}
-                        onPress={() => {}}
-                        disabled={true}
-                        theme={{
-                          colors: {
-                            onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
-                          },
-                        }}
-                      />
-                      <Text
-                        style={{
-                          flex: 1,
-                          color: "#353172",
-                          paddingRight: 5,
-                        }}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        {e.title}
-                      </Text>
-                    </View>
-                  </Pressable>
+                    </Pressable>
+                  </View>
                 </View>
-              </View>
-            );
-          })) || <Text style={{ color: "#353172" }}>No entry found</Text>}
-        {selectedEntry && (
-          <CModal
-            visible={visible}
-            hideModal={hideModal}
-            showModal={showModal}
-            style={{}}
-            children={
-              <View style={{ gap: 8 }}>
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <CChip
-                    theme={{
-                      colors: {
-                        surfaceDisabled: "#BBB0D1",
-                        onSurfaceDisabled: "#534DB3",
-                      } as any,
-                    }}
-                    onPress={() => {}}
-                    label=""
-                    mode="flat"
-                    textStyle={{ color: "#534DB3" }}
-                    style={{}}
-                    icon=""
-                    disabled={true}
-                  >
-                    <>
-                      <Text style={{ color: "gray" }}>date: </Text>
-                      <Text>
-                        {formatDateFR(new Date(selectedEntry?.created_at))}
-                      </Text>
-                    </>
-                  </CChip>
-                  <CIconButton
-                    style={{
-                      backgroundColor: "rgba(229, 231, 235)",
-                    }}
-                    mode="contained"
-                    icon={emotions[(selectedEntry?.feeling ?? 3) - 1]}
-                    iconColor="#534DB3"
-                    containerColor=""
-                    size={18}
-                    onPress={() => {}}
-                  />
-                  <CChip
-                    theme={{
-                      colors: {
-                        surfaceDisabled: "#BBB0D1",
-                        onSurfaceDisabled: "#534DB3",
-                      } as any,
-                    }}
-                    onPress={() => {}}
-                    label=""
-                    mode="flat"
-                    textStyle={{ color: "#534DB3" }}
-                    style={{}}
-                    icon=""
-                    disabled={true}
-                  >
-                    <>
-                      <Text style={{ color: "gray" }}>title: </Text>
-                      <Text>{selectedEntry.title}</Text>
-                    </>
-                  </CChip>
-                </View>
-                <View
-                  style={{
-                    display: "flex",
-                    width: "100%",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <CTextInput
-                    secureTextEntry={false}
-                    right={<></>}
-                    onBlur={() => {}}
-                    onChangeText={() => {}}
-                    label="Content"
-                    msg={selectedEntry?.content ?? ""}
-                    placeholder=""
-                    variant="outlined"
-                    textColor="#534DB3"
-                    outlineColor="#534DB3"
-                    outlineStyle={{ borderRadius: 10 }}
-                    activeOutlineColor="#534DB3"
-                    underlineColor="#534DB3"
-                    activeUnderlineColor="#534DB3"
-                    selectionColor="#534DB3"
-                    contentStyle={{}}
-                    style={{ flex: 1 }}
-                    disabled={true}
-                    multiline={true}
-                  />
-                </View>
-              </View>
-            }
-          />
-        )}
+              );
+            })) || (
+            <Text style={{ color: "#353172", textAlign: "center" }}>
+              No entry found
+            </Text>
+          )}
+        </ScrollView>
       </View>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-around",
-          alignItems: "center",
-        }}
-      ></View>
     </View>
   );
 };

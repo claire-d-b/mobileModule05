@@ -11,18 +11,10 @@ interface Props {
   page: number;
   date: Date;
   setDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
-  fetchEntriesByDate: (
-    selectedDate: Date,
-    pageNumber?: number,
-  ) => Promise<void>;
 }
 
 // Remplace le Button + DatePickerModal par :
-const _ = ({ page, date, setDate, fetchEntriesByDate }: Props) => {
-  useEffect(() => {
-    fetchEntriesByDate(date, page);
-    // setDate(date);
-  }, [page, date]);
+const _ = ({ page, date, setDate }: Props) => {
   return (
     <Calendar
       firstDay={1}
