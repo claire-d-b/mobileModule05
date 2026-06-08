@@ -25,6 +25,7 @@ const _ = ({ page, date, setDate, fetchEntriesByDate }: Props) => {
   }, [page, date]);
   return (
     <Calendar
+      firstDay={1}
       style={{
         borderRadius: 10,
         marginBottom: 10,
