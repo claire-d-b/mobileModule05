@@ -1,6 +1,12 @@
 import { useRouter } from "expo-router";
 import { useNavigation } from "expo-router";
-import { View, Platform, Pressable } from "react-native";
+import {
+  View,
+  Platform,
+  Pressable,
+  useWindowDimensions,
+  ScrollView,
+} from "react-native";
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
@@ -50,7 +56,15 @@ interface Props {
   setEntries: [];
 }
 
+const getEllipsis = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + "...";
+};
+
 const _ = () => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
   const { localLogin } = useAuthContext();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -216,7 +230,7 @@ const _ = () => {
       style={{
         display: "flex",
         width: "100%",
-        height: "100%",
+        flex: 1,
         paddingVertical: 20,
         flexDirection: "column",
         alignItems: "center",
@@ -224,7 +238,7 @@ const _ = () => {
         backgroundColor: "white",
       }}
     >
-      <Text style={{ color: "#353172", padding: 40 }}>
+      <Text style={{ color: "#353172", padding: isLandscape ? 0 : 40 }}>
         Add a new entry to your diary by clicking Add entry. You can click on a
         specific entry in the below list to get details.
       </Text>
@@ -318,237 +332,259 @@ const _ = () => {
           </View>
         </View>
       </CModal>
-      <View
+      <ScrollView
         style={{
           display: "flex",
-          flexDirection: "column",
+          flexDirection: isLandscape ? "row" : "column",
           width: "100%",
           padding: 10,
         }}
       >
-        {entries &&
-          entries.length > 0 &&
-          entries.map((e, i) => {
-            return (
-              <Pressable
-                key={`entry_${i}`}
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  marginHorizontal: 20,
-                  marginVertical: 2.5,
-                  padding: 5,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: pressed[i] ? "#534DB3" : "#BBB0D1",
-                  borderRadius: 10,
-                }}
-                onPressIn={() => {
-                  setPressed((prev) =>
-                    prev.map((v, idx) => (idx === i ? true : v)),
-                  );
-                }}
-                onPressOut={() => {
-                  setPressed((prev) =>
-                    prev.map((v, idx) => (idx === i ? false : v)),
-                  );
-                  setSelectedIndex(i);
-                  showDetails();
-                }}
-              >
-                <View
+        <View
+          style={{
+            display: "flex",
+            flexDirection: isLandscape ? "row" : "column",
+            width: "100%",
+          }}
+        >
+          {entries &&
+            entries.length > 0 &&
+            entries.map((e, i) => {
+              return (
+                <Pressable
+                  key={`entry_${i}`}
                   style={{
-                    backgroundColor: "white",
+                    display: "flex",
+                    flexDirection: "row",
+                    marginHorizontal: 20,
+                    marginVertical: 2.5,
+                    padding: 5,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: pressed[i] ? "#534DB3" : "#BBB0D1",
                     borderRadius: 10,
-                    margin: 5,
+                  }}
+                  onPressIn={() => {
+                    setPressed((prev) =>
+                      prev.map((v, idx) => (idx === i ? true : v)),
+                    );
+                  }}
+                  onPressOut={() => {
+                    setPressed((prev) =>
+                      prev.map((v, idx) => (idx === i ? false : v)),
+                    );
+                    setSelectedIndex(i);
+                    showDetails();
                   }}
                 >
-                  <CChip
+                  <View
+                    style={{
+                      backgroundColor: "white",
+                      borderRadius: 10,
+                      margin: 5,
+                    }}
+                  >
+                    <CChip
+                      theme={{
+                        colors: {
+                          surfaceDisabled: "#BBB0D1",
+                          onSurfaceDisabled: "#534DB3",
+                        } as any,
+                      }}
+                      onPress={() => {}}
+                      label=""
+                      mode="outlined"
+                      textStyle={{ color: "#534DB3" }}
+                      style={{ alignSelf: "flex-start" }} // ← add this}}
+                      icon=""
+                      disabled={true}
+                    >
+                      <Text style={{ color: "#534DB3" }}>
+                        {formatDate(e.date)}
+                      </Text>
+                    </CChip>
+                  </View>
+                  <CIconButton
+                    icon={emotions[(e.feeling ?? 1) - 1]}
+                    iconColor="#534DB3"
+                    containerColor=""
+                    size={20}
+                    onPress={() => {}}
+                    disabled={true}
                     theme={{
                       colors: {
-                        surfaceDisabled: "#BBB0D1",
-                        onSurfaceDisabled: "#534DB3",
-                      } as any,
+                        onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
+                      },
                     }}
-                    onPress={() => {}}
-                    label=""
-                    mode="outlined"
-                    textStyle={{ color: "#534DB3" }}
-                    style={{}}
-                    icon=""
-                    disabled={true}
-                  >
-                    <Text style={{ color: "#534DB3" }}>
-                      {formatDate(e.date)}
-                    </Text>
-                  </CChip>
-                </View>
-                <CIconButton
-                  icon={emotions[(e.feeling ?? 1) - 1]}
-                  iconColor="#534DB3"
-                  containerColor=""
-                  size={20}
-                  onPress={() => {}}
-                  disabled={true}
-                  theme={{
-                    colors: {
-                      onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
-                    },
-                  }}
-                />
-                <View
-                  style={{
-                    flex: 1,
-                    overflow: "hidden",
-                    flexDirection: "row",
-                  }}
-                >
-                  <Text
+                  />
+                  <View
                     style={{
                       flex: 1,
-                      color: pressed[i] ? "white" : "#353172",
+                      overflow: "hidden",
+                      flexDirection: "row",
                     }}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
                   >
-                    {e.title}
-                  </Text>
-                </View>
-                <CIconButton
-                  icon="trash-can-outline"
-                  iconColor={pressed[i] ? "white" : "#534DB3"}
-                  containerColor="transparent"
-                  size={20}
-                  onPress={() => {
-                    deleteEntry(e.id);
-                  }}
-                />
-                {details && (
-                  <>
-                    <Portal>
-                      <Modal
-                        style={{ width: "100%", padding: 10 }}
-                        visible={details}
-                        onDismiss={hideDetails}
-                        contentContainerStyle={containerStyle}
-                      >
-                        <CIconButton
-                          style={{ alignSelf: "flex-end" }}
-                          icon="close"
-                          iconColor="#534DB3"
-                          containerColor=""
-                          size={20}
-                          onPress={hideDetails}
-                        />
-                        {
-                          <View
-                            style={{
-                              display: "flex",
-                              width: "100%",
-                              paddingBottom: 10,
-                              paddingLeft: 20,
-                              paddingRight: 20,
-                              // height: "100%",
-                            }}
-                          >
+                    <Text
+                      style={{
+                        flex: 1,
+                        color: pressed[i] ? "white" : "#353172",
+                      }}
+                    >
+                      {getEllipsis(e.title, 10)}
+                    </Text>
+                  </View>
+                  <CIconButton
+                    icon="trash-can-outline"
+                    iconColor={pressed[i] ? "white" : "#534DB3"}
+                    containerColor="transparent"
+                    size={20}
+                    onPress={() => {
+                      deleteEntry(e.id);
+                    }}
+                  />
+                  {details && (
+                    <>
+                      <Portal>
+                        <Modal
+                          style={{
+                            padding: 10,
+                            alignSelf: "center",
+                            margin: isLandscape ? 150 : 0,
+                          }}
+                          visible={details}
+                          onDismiss={hideDetails}
+                          contentContainerStyle={containerStyle}
+                        >
+                          <CIconButton
+                            style={{ alignSelf: "flex-end" }}
+                            icon="close"
+                            iconColor="#534DB3"
+                            containerColor=""
+                            size={20}
+                            onPress={hideDetails}
+                          />
+                          {
                             <View
                               style={{
                                 display: "flex",
+                                flexDirection: "column",
                                 width: "100%",
-                                flexDirection: "row",
-                                justifyContent: "flex-start",
-                                alignItems: "center",
+                                paddingBottom: 10,
+                                paddingLeft: 20,
+                                paddingRight: 20,
+                                // height: "100%",
                               }}
                             >
-                              <CChip
-                                onPress={() => {}}
-                                label=""
-                                mode="outlined"
-                                icon=""
-                                disabled={true}
-                                textStyle={{ color: "#534DB3" }}
+                              <View
                                 style={{
-                                  borderColor: "#534DB3", // ← directement dans style
-                                  borderWidth: 1,
+                                  display: "flex",
+                                  width: "100%",
+                                  flexDirection: "column",
+                                  justifyContent: "flex-start",
+                                  alignItems: "center",
                                 }}
                               >
-                                <Text style={{ color: "#534DB3" }}>
-                                  {formatDate(
-                                    selectedEntry?.date ??
-                                      formatDate(
-                                        new Date().toLocaleDateString(),
-                                      ),
-                                  )}
-                                </Text>
-                              </CChip>
-                              <CIconButton
-                                icon={`${
-                                  emotions[(selectedEntry?.feeling ?? 1) - 1]
-                                }-outline`}
-                                iconColor="#534DB3"
-                                containerColor=""
-                                size={20}
-                                onPress={() => {}}
-                                disabled={true}
-                                theme={{
-                                  colors: {
-                                    onSurfaceDisabled: "#534DB3", // ← couleur de l'icône quand disabled
-                                  },
-                                }}
-                              />
-                              <CChip
-                                theme={{
-                                  colors: {
-                                    surfaceDisabled: "#BBB0D1",
-                                    onSurfaceDisabled: "#534DB3",
-                                  } as any,
-                                }}
-                                onPress={() => {}}
-                                label=""
-                                mode="flat"
-                                textStyle={{ color: "white" }}
-                                style={{
-                                  flex: 1,
-                                  backgroundColor: "#BBB0D1",
-                                }}
-                                icon=""
-                                disabled={true}
-                              >
-                                <Text
+                                <View
                                   style={{
-                                    flex: 1,
-                                    color: "#353172",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "flex-start",
                                   }}
-                                  numberOfLines={1}
-                                  ellipsizeMode="tail"
                                 >
-                                  {selectedEntry?.title}
-                                </Text>
-                              </CChip>
+                                  <View
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      width: "100%",
+                                      justifyContent: "flex-start",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <CChip
+                                      onPress={() => {}}
+                                      label=""
+                                      mode="outlined"
+                                      icon=""
+                                      disabled={true}
+                                      textStyle={{ color: "#534DB3" }}
+                                      style={{
+                                        borderColor: "#534DB3", // ← directement dans style
+                                        borderWidth: 1,
+                                      }}
+                                    >
+                                      <Text style={{ color: "#534DB3" }}>
+                                        {formatDate(
+                                          selectedEntry?.date ??
+                                            formatDate(
+                                              new Date().toLocaleDateString(),
+                                            ),
+                                        )}
+                                      </Text>
+                                    </CChip>
+                                    <CIconButton
+                                      icon={`${
+                                        emotions[
+                                          (selectedEntry?.feeling ?? 1) - 1
+                                        ]
+                                      }-outline`}
+                                      iconColor="#534DB3"
+                                      containerColor=""
+                                      size={20}
+                                      style={{ alignSelf: "center" }}
+                                      onPress={() => {}}
+                                      disabled={true}
+                                      theme={{
+                                        colors: {
+                                          onSurfaceDisabled: "#534DB3", // ← couleur de l'icône quand disabled
+                                        },
+                                      }}
+                                    />
+                                  </View>
+                                  <Text
+                                    style={{
+                                      color: "#353172",
+                                      backgroundColor: "#BBB0D1",
+                                      borderRadius: 8,
+                                      padding: 8,
+                                      flexWrap: "wrap",
+                                    }}
+                                  >
+                                    {selectedEntry?.title}
+                                  </Text>
+
+                                  <Text
+                                    style={{
+                                      color: "#534DB3",
+                                      paddingVertical: 20,
+                                      alignSelf: "flex-start",
+                                    }}
+                                  >
+                                    {selectedEntry?.content}
+                                  </Text>
+                                </View>
+                              </View>
                             </View>
-                            <Text
-                              style={{ color: "#534DB3", paddingVertical: 20 }}
-                            >
-                              {selectedEntry?.content}
-                            </Text>
-                          </View>
-                        }
-                        <View
-                          style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "flex-start",
-                            alignItems: "center",
-                          }}
-                        ></View>
-                      </Modal>
-                    </Portal>
-                  </>
-                )}
-              </Pressable>
-            );
-          })}
-      </View>
+                          }
+                        </Modal>
+                      </Portal>
+                    </>
+                  )}
+                </Pressable>
+              );
+            })}
+        </View>
+        <Text
+          style={{
+            width: "100%",
+            marginLeft: 20,
+            marginTop: 10,
+            color: "#534DB3",
+          }}
+        >
+          {`Scroll on the right to see next 6 entries. Click below to get newer (<) or older (>) entries.`}
+        </Text>
+      </ScrollView>
       <View
         style={{
           display: "flex",

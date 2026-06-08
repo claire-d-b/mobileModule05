@@ -25,21 +25,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
-  // 2. sync Firebase auth (IMPORTANT FIX)
   useEffect(() => {
     const auth = getAuth();
+    let initialized = false;
 
-    const unsubscribe = // Fix this in AuthContext.tsx
-      onAuthStateChanged(auth, async (user) => {
-        if (user?.email) {
-          setLocalLoginState(user.email);
-          await AsyncStorage.setItem("localLogin", user.email);
-        } else {
-          // ADD THIS - clear on firebase signout
-          setLocalLoginState(null);
-          await AsyncStorage.removeItem("localLogin");
-        }
-      });
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user?.email) {
+        setLocalLoginState(user.email);
+        await AsyncStorage.setItem("localLogin", user.email);
+      } else if (initialized) {
+        // Only clear on explicit signout, not on initial null state
+        setLocalLoginState(null);
+        await AsyncStorage.removeItem("localLogin");
+      }
+      initialized = true;
+    });
 
     return unsubscribe;
   }, []);
