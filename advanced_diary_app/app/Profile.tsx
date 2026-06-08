@@ -13,6 +13,7 @@ import {
   PaperProvider,
   IconButton,
 } from "react-native-paper";
+import { router } from "expo-router";
 import CTextInput from "./CTextInput";
 import CIconButton from "./CIconButton";
 import CRating from "./CRating";
@@ -58,7 +59,7 @@ const successColor = "#25783F";
 const errorColor = "#A12237";
 
 const Profile = ({ login }: Props) => {
-  const { localLogin } = useAuthContext();
+  const { localLogin, setLocalLogin } = useAuthContext();
   const firebaseEmail = getAuth().currentUser?.email;
   const email = firebaseEmail ?? localLogin;
 
@@ -70,7 +71,7 @@ const Profile = ({ login }: Props) => {
     setPage(0);
   }, [email]);
 
-  console.log("authhhh", localLogin);
+  console.log("authhhh");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [feeling, setFeeling] = useState(3);
@@ -89,8 +90,9 @@ const Profile = ({ login }: Props) => {
   const [type, setType] = useState("");
 
   // const auth = getAuth();
-  // const email = auth.currentUser?.email ?? localLogin;
-  console.log(localLogin);
+  // const email = auth.currentUser?.email ??
+  // ;
+  console.log();
 
   const fetchEntries = async (pageNumber = 0) => {
     if (!login) return;
@@ -185,6 +187,14 @@ const Profile = ({ login }: Props) => {
     });
   };
 
+  const logout = async () => {
+    try {
+      await getAuth().signOut();
+    } catch (_) {}
+    await setLocalLogin(null);
+    router.replace("/");
+  };
+
   const handleSubmit = async () => {
     setMessage("");
     if (!title || !content) {
@@ -260,20 +270,37 @@ const Profile = ({ login }: Props) => {
     >
       <View
         style={{
-          width: "100%",
           display: "flex",
           flexDirection: "row",
-          justifyContent: "center",
+          width: "100%",
+          justifyContent: "space-around",
           alignItems: "center",
         }}
       >
-        <CAvatar
-          size={80}
-          icon="account"
-          color="white"
-          style={{ backgroundColor: "#534DB3" }}
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CAvatar
+            size={80}
+            icon="account"
+            color="white"
+            style={{ backgroundColor: "#534DB3" }}
+          />
+          <Text style={{ padding: 20, color: "#353172" }}>{email}</Text>
+        </View>
+        <CIconButton
+          mode="outlined"
+          icon="logout"
+          iconColor="#534DB3"
+          containerColor="transparent"
+          size={20}
+          onPress={logout}
         />
-        <Text style={{ padding: 20, color: "#353172" }}>{email}</Text>
       </View>
       <Text style={{ color: "#353172" }}>Your last diary entries</Text>
       <View style={{ width: "100%", display: "flex", flexDirection: "column" }}>
