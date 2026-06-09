@@ -267,7 +267,7 @@ const Profile = ({ login }: Props) => {
         height: "100%",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "space-around",
+        justifyContent: isLandscape ? "flex-start" : "space-around",
         backgroundColor: "white",
       }}
     >
@@ -430,20 +430,32 @@ const Profile = ({ login }: Props) => {
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
+                    justifyContent: "flex-start",
                     width: "100%", // ← pas de flex: 1 ici
                   }}
                 >
-                  <CIconButton
-                    icon={emotions[f - 1]}
-                    iconColor="#534DB3"
-                    containerColor="transparent"
-                    size={24}
-                    onPress={() => {}}
-                  />
+                  {(isLandscape && (
+                    <CIconButton
+                      style={{ padding: 0, margin: 0 }}
+                      icon={emotions[f - 1]}
+                      iconColor="#534DB3"
+                      containerColor="transparent"
+                      size={20}
+                      onPress={() => {}}
+                    />
+                  )) || (
+                    <CIconButton
+                      icon={emotions[f - 1]}
+                      iconColor="#534DB3"
+                      containerColor="transparent"
+                      size={20}
+                      onPress={() => {}}
+                    />
+                  )}
                   <View
                     style={{
                       flex: 1,
-                      height: 6,
+                      height: isLandscape ? 4 : 6,
                       backgroundColor: "#e0e0e0",
                       borderRadius: 4,
                       marginHorizontal: 8,
@@ -452,7 +464,7 @@ const Profile = ({ login }: Props) => {
                     <View
                       style={{
                         width: `${stats[f]?.percentage ?? 0}%`,
-                        height: 6,
+                        height: isLandscape ? 4 : 6,
                         backgroundColor: "#534DB3",
                         borderRadius: 4,
                       }}
