@@ -238,7 +238,7 @@ const _ = () => {
         backgroundColor: "white",
       }}
     >
-      <Text style={{ color: "#353172", padding: isLandscape ? 0 : 40 }}>
+      <Text style={{ color: "#353172", padding: isLandscape ? 0 : 20 }}>
         Add a new entry to your diary by clicking Add entry. You can click on a
         specific entry in the below list to get details.
       </Text>
@@ -573,16 +573,18 @@ const _ = () => {
             );
           })}
       </ScrollView>
-      <Text
-        style={{
-          width: "100%",
-          marginLeft: 20,
-          marginTop: 10,
-          color: "#534DB3",
-        }}
-      >
-        {`Scroll on the right to see next 6 entries. Click below to get newer (<) or older (>) entries.`}
-      </Text>
+      {isLandscape && (
+        <Text
+          style={{
+            width: "100%",
+            marginLeft: 20,
+            marginTop: 10,
+            color: "#534DB3",
+          }}
+        >
+          {`Scroll on the right to see next 6 entries. Click below to get newer (<) or older (>) entries.`}
+        </Text>
+      )}
       <View
         style={{
           display: "flex",
