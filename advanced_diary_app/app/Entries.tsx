@@ -106,7 +106,10 @@ const _ = () => {
   };
 
   const formatDate = (timestamp: string) => {
-    return new Date(timestamp).toISOString().split("T")[0]; // "2026-05-01"
+    if (!timestamp) return "";
+    const d = new Date(timestamp);
+    if (isNaN(d.getTime())) return timestamp; // return as-is if invalid
+    return d.toISOString().split("T")[0];
   };
 
   const fetchEntries = async (pageNumber = 0) => {
@@ -351,7 +354,7 @@ const _ = () => {
           entries.length > 0 &&
           entries.map((e, i) => {
             return (
-              <Pressable
+              <View
                 key={`entry_${i}`}
                 style={{
                   display: "flex",
@@ -364,18 +367,18 @@ const _ = () => {
                   backgroundColor: pressed[i] ? "#534DB3" : "#BBB0D1",
                   borderRadius: 10,
                 }}
-                onPressIn={() => {
-                  setPressed((prev) =>
-                    prev.map((v, idx) => (idx === i ? true : v)),
-                  );
-                }}
-                onPressOut={() => {
-                  setPressed((prev) =>
-                    prev.map((v, idx) => (idx === i ? false : v)),
-                  );
-                  setSelectedIndex(i);
-                  showDetails();
-                }}
+                // onPressIn={() => {
+                //   setPressed((prev) =>
+                //     prev.map((v, idx) => (idx === i ? true : v)),
+                //   );
+                // }}
+                // onPressOut={() => {
+                //   setPressed((prev) =>
+                //     prev.map((v, idx) => (idx === i ? false : v)),
+                //   );
+                //   setSelectedIndex(i);
+                //   showDetails();
+                // }}
               >
                 <View
                   style={{
@@ -419,22 +422,42 @@ const _ = () => {
                 />
                 <Text
                   style={{
-                    // flex: 1,
+                    flex: 1,
                     alignSelf: "center",
                     color: pressed[i] ? "white" : "#353172",
                   }}
                 >
-                  {getEllipsis(e.title, 10)}
+                  {(isLandscape && getEllipsis(e.title, 10)) ||
+                    getEllipsis(e.title, 4)}
                 </Text>
-                <CIconButton
-                  icon="trash-can-outline"
-                  iconColor={pressed[i] ? "white" : "#534DB3"}
-                  containerColor="transparent"
-                  size={20}
-                  onPress={() => {
-                    deleteEntry(e.id);
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
                   }}
-                />
+                >
+                  <CIconButton
+                    icon="eye-outline"
+                    iconColor={pressed[i] ? "white" : "#534DB3"}
+                    containerColor="transparent"
+                    size={20}
+                    onPress={() => {
+                      setSelectedIndex(i); // ← add this
+                      showDetails();
+                    }}
+                  />
+                  <CIconButton
+                    icon="trash-can-outline"
+                    iconColor={pressed[i] ? "white" : "#534DB3"}
+                    containerColor="transparent"
+                    size={20}
+                    onPress={() => {
+                      deleteEntry(e.id);
+                    }}
+                  />
+                </View>
                 {details && (
                   <>
                     <Portal>
@@ -563,7 +586,7 @@ const _ = () => {
                     </Portal>
                   </>
                 )}
-              </Pressable>
+              </View>
             );
           })}
       </ScrollView>
