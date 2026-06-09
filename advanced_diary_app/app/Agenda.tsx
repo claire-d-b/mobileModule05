@@ -102,10 +102,15 @@ const _ = ({ login }: Props) => {
           flex: 1,
           justifyContent: "flex-start",
           alignItems: "center",
-          padding: 20,
+          padding: 10,
         }}
       >
         <CCalendar page={page} date={date ?? new Date()} setDate={setDate} />
+        {entries && entries.length && (
+          <Text style={{ color: "#534DB3" }}>
+            Scroll down to see next entries.
+          </Text>
+        )}
         <ScrollView style={{ width: "100%", flex: 1 }}>
           {(entries &&
             entries.length > 0 &&
