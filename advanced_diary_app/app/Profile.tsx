@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useNavigation } from "expo-router";
-import { View, Platform } from "react-native";
+import { View, Platform, useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
@@ -31,7 +31,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.39:3000";
+const backendUrl = "http://192.168.1.192:3000";
 
 interface Entry {
   id: number;
@@ -59,6 +59,9 @@ const successColor = "#25783F";
 const errorColor = "#A12237";
 
 const Profile = ({ login }: Props) => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
   const { localLogin, setLocalLogin } = useAuthContext();
   const firebaseEmail = getAuth().currentUser?.email;
   const email = firebaseEmail ?? localLogin;
