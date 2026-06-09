@@ -305,144 +305,173 @@ const Profile = ({ login }: Props) => {
           onPress={logout}
         />
       </View>
-      <Text style={{ color: "#353172" }}>Your last diary entries</Text>
-      <View style={{ width: "100%", display: "flex", flexDirection: "column" }}>
-        {entries &&
-          entries.length > 0 &&
-          entries.slice(0, 2).map((e, i) => {
-            return (
-              <View
-                key={`entry_${i}`}
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  marginHorizontal: 20,
-                  marginVertical: 2.5,
-                  padding: 5,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: "#BBB0D1",
-                  borderRadius: 10,
-                }}
-              >
-                <View
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: 10,
-                    margin: 5,
-                  }}
-                >
-                  <CChip
-                    theme={{
-                      colors: {
-                        surfaceDisabled: "#BBB0D1",
-                        onSurfaceDisabled: "#534DB3",
-                      } as any,
-                    }}
-                    onPress={() => {}}
-                    label=""
-                    mode="outlined"
-                    textStyle={{ color: "#534DB3" }}
-                    style={{}}
-                    icon=""
-                    disabled={true}
-                  >
-                    {formatDateFR(new Date(e.date))}
-                  </CChip>
-                </View>
-                <CIconButton
-                  icon={emotions[(e.feeling ?? 3) - 1]}
-                  iconColor="#534DB3"
-                  containerColor=""
-                  size={20}
-                  onPress={() => {}}
-                  theme={{
-                    colors: {
-                      onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
-                    },
-                  }}
-                  disabled={true}
-                />
-                <Text
-                  style={{
-                    flex: 1,
-                    color: "#353172",
-                    paddingRight: 5,
-                  }}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {e.title}
-                </Text>
-              </View>
-            );
-          })}
-      </View>
       <View
         style={{
+          flexDirection: isLandscape ? "row" : "column",
           width: "100%",
-          flexDirection: "column",
-          paddingHorizontal: 20,
+          alignItems: isLandscape ? "flex-start" : "center",
         }}
       >
-        {totalNbOfEntries > 0 && (
-          <Text
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: isLandscape ? "50%" : "100%",
+          }}
+        >
+          <Text style={{ color: "#353172", alignSelf: "center" }}>
+            Your last diary entries
+          </Text>
+          <View
+            style={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
+            {entries &&
+              entries.length > 0 &&
+              entries.slice(0, 2).map((e, i) => {
+                return (
+                  <View
+                    key={`entry_${i}`}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      marginHorizontal: 20,
+                      marginVertical: 2.5,
+                      padding: 5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      backgroundColor: "#BBB0D1",
+                      borderRadius: 10,
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: "white",
+                        borderRadius: 10,
+                        margin: 5,
+                      }}
+                    >
+                      <CChip
+                        theme={{
+                          colors: {
+                            surfaceDisabled: "#BBB0D1",
+                            onSurfaceDisabled: "#534DB3",
+                          } as any,
+                        }}
+                        onPress={() => {}}
+                        label=""
+                        mode="outlined"
+                        textStyle={{ color: "#534DB3" }}
+                        style={{}}
+                        icon=""
+                        disabled={true}
+                      >
+                        {formatDateFR(new Date(e.date))}
+                      </CChip>
+                    </View>
+                    <CIconButton
+                      icon={emotions[(e.feeling ?? 3) - 1]}
+                      iconColor="#534DB3"
+                      containerColor=""
+                      size={20}
+                      onPress={() => {}}
+                      theme={{
+                        colors: {
+                          onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
+                        },
+                      }}
+                      disabled={true}
+                    />
+                    <Text
+                      style={{
+                        flex: 1,
+                        color: "#353172",
+                        paddingRight: 5,
+                      }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {e.title}
+                    </Text>
+                  </View>
+                );
+              })}
+          </View>
+        </View>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flexWrap: "wrap",
+            width: isLandscape ? "50%" : "100%",
+          }}
+        >
+          <View
             style={{
-              color: "#353172",
-              textAlign: "center",
+              width: "100%",
+              flexDirection: "column",
+              paddingHorizontal: 20,
             }}
           >
-            {`Your feels for ${totalNbOfEntries} entries`}
-          </Text>
-        )}
-        {[1, 2, 3, 4, 5]
-          .filter((f) => stats[f]?.percentage > 0)
-          .map((f) => (
-            <View
-              key={`stat_${f}`}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                width: "100%", // ← pas de flex: 1 ici
-              }}
-            >
-              <CIconButton
-                icon={emotions[f - 1]}
-                iconColor="#534DB3"
-                containerColor="transparent"
-                size={24}
-                onPress={() => {}}
-              />
-              <View
-                style={{
-                  flex: 1,
-                  height: 6,
-                  backgroundColor: "#e0e0e0",
-                  borderRadius: 4,
-                  marginHorizontal: 8,
-                }}
-              >
-                <View
-                  style={{
-                    width: `${stats[f]?.percentage ?? 0}%`,
-                    height: 6,
-                    backgroundColor: "#534DB3",
-                    borderRadius: 4,
-                  }}
-                />
-              </View>
+            {totalNbOfEntries > 0 && (
               <Text
                 style={{
                   color: "#353172",
-                  minWidth: 45,
-                  textAlign: "right",
-                  marginRight: 20,
+                  textAlign: "center",
                 }}
               >
-                {`${stats[f]?.percentage ?? 0}%`}
+                {`Your feels for ${totalNbOfEntries} entries`}
               </Text>
-            </View>
-          ))}
+            )}
+            {[1, 2, 3, 4, 5]
+              .filter((f) => stats[f]?.percentage > 0)
+              .map((f) => (
+                <View
+                  key={`stat_${f}`}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    width: "100%", // ← pas de flex: 1 ici
+                  }}
+                >
+                  <CIconButton
+                    icon={emotions[f - 1]}
+                    iconColor="#534DB3"
+                    containerColor="transparent"
+                    size={24}
+                    onPress={() => {}}
+                  />
+                  <View
+                    style={{
+                      flex: 1,
+                      height: 6,
+                      backgroundColor: "#e0e0e0",
+                      borderRadius: 4,
+                      marginHorizontal: 8,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: `${stats[f]?.percentage ?? 0}%`,
+                        height: 6,
+                        backgroundColor: "#534DB3",
+                        borderRadius: 4,
+                      }}
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      color: "#353172",
+                      minWidth: 45,
+                      textAlign: "right",
+                      marginRight: 20,
+                    }}
+                  >
+                    {`${stats[f]?.percentage ?? 0}%`}
+                  </Text>
+                </View>
+              ))}
+          </View>
+        </View>
       </View>
     </View>
   );
