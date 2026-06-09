@@ -32,7 +32,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "http://192.168.1.39:3000";
 
 interface Entry {
   id: number;
@@ -337,6 +337,7 @@ const _ = () => {
           display: "flex",
           flexDirection: isLandscape ? "row" : "column",
           width: "100%",
+          height: "100%",
           padding: 10,
           // flexGrow: 0,
         }}
@@ -416,22 +417,15 @@ const _ = () => {
                     },
                   }}
                 />
-                <View
+                <Text
                   style={{
-                    flex: 1,
-                    overflow: "hidden",
-                    flexDirection: "row",
+                    // flex: 1,
+                    alignSelf: "center",
+                    color: pressed[i] ? "white" : "#353172",
                   }}
                 >
-                  <Text
-                    style={{
-                      flex: 1,
-                      color: pressed[i] ? "white" : "#353172",
-                    }}
-                  >
-                    {getEllipsis(e.title, 10)}
-                  </Text>
-                </View>
+                  {getEllipsis(e.title, 10)}
+                </Text>
                 <CIconButton
                   icon="trash-can-outline"
                   iconColor={pressed[i] ? "white" : "#534DB3"}
