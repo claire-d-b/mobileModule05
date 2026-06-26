@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Modal, Portal, Text, Button, PaperProvider } from "react-native-paper";
@@ -18,6 +18,7 @@ import CRating from "./CRating";
 import CChip from "./CChip";
 import CModal from "./CModal";
 import CAvatar from "./CAvatar";
+import CDialog from "./CDialog";
 import type { MD3Colors } from "react-native-paper";
 import CButton from "./CButton";
 import { Background } from "@react-navigation/elements";
@@ -65,10 +66,17 @@ const _ = () => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrev, setHasPrev] = useState(false);
+
   const { localLogin } = useAuthContext();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [feeling, setFeeling] = useState(1);
+
+  const [visibleDialog, setVisibleDialog] = useState(false);
+  const showDialog = () => setVisibleDialog(true);
+  const hideDialog = () => setVisibleDialog(false);
 
   const [visible, setVisible] = useState(false);
   const [details, setDetails] = useState(false);
@@ -97,47 +105,34 @@ const _ = () => {
   };
 
   const auth = getAuth();
-  const email = auth.currentUser?.email ?? localLogin;
-  // console.log(auth.currentUser);
-
-  const getEmail = () => {
-    const firebaseEmail = getAuth().currentUser?.email;
-    return firebaseEmail ?? localLogin ?? null;
-  };
+  const [email, setEmail] = useState<string | null>(localLogin ?? null);
 
   const formatDate = (timestamp: string) => {
     if (!timestamp) return "";
     const d = new Date(timestamp);
     if (isNaN(d.getTime())) return timestamp; // return as-is if invalid
-    return d.toISOString().split("T")[0];
+    return d.toLocaleDateString("en-CA");
   };
 
-  const fetchEntries = async (pageNumber = 0) => {
-    const email = getEmail();
-    console.log("📡 fetchEntries email:", email);
-    console.log(pageNumber);
-    if (!email) return;
+  const fetchEntries = async (
+    pageNumber = 0,
+    resolvedEmail?: string | null,
+  ) => {
+    const emailToUse = resolvedEmail ?? email;
+    if (!emailToUse) return;
 
     try {
       const res = await fetch(
-        `${backendUrl}/entries/${encodeURIComponent(email)}?page=${pageNumber}`,
+        `${backendUrl}/entries/${encodeURIComponent(emailToUse)}?page=${pageNumber}`,
       );
-
       const data = await res.json();
-      console.log("data:", data);
+      if (!res.ok) return;
 
-      if (!res.ok) {
-        console.error("❌ Failed to fetch entries:", data.error);
-        return;
-      }
-      // ✅ data est un tableau brut
-      const list: Entry[] = Array.isArray(data) ? data : (data.entries ?? []);
-
+      const list: Entry[] = data.entries ?? [];
       setEntries(list);
-      setPressed(new Array(list.length).fill(false)); // ✅ sync avec les entries
-      setTotalPages(Math.ceil(list.length / nbOfEntriesPerPage));
-
-      console.log("✅ Entries fetched:", list.length);
+      setPressed(new Array(list.length).fill(false));
+      setHasNext(data.hasNext); // ✅
+      setHasPrev(data.hasPrev); // ✅
     } catch (err) {
       console.error("❌ Error fetching entries:", err);
     }
@@ -159,7 +154,7 @@ const _ = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+          date: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
           title,
           feeling,
           content,
@@ -181,7 +176,7 @@ const _ = () => {
       setTitle("");
       setContent("");
       setFeeling(1);
-      await fetchEntries(0);
+      await fetchEntries(0, email);
       hideModal();
     } catch (err) {
       console.error("❌ Error creating entry:", err);
@@ -199,24 +194,34 @@ const _ = () => {
         return;
       }
       console.log("✅ Entry deleted:", data.entry);
-      await fetchEntries(page); // ← recharge la page courante
+
+      // ← si c'était la dernière entrée de la page, revenir à la page précédente
+      if (entries.length === 1 && page > 0) {
+        const prevPage = page - 1;
+        setPage(prevPage);
+        await fetchEntries(prevPage, email);
+      } else {
+        await fetchEntries(page, email);
+      }
     } catch (err) {
       console.error("❌ Error deleting entry:", err);
     }
   };
 
   const loadMore = async () => {
-    if (page < totalPages) {
+    if (hasNext) {
+      // ✅ au lieu de page < totalPages
       const nextPage = page + 1;
-      await fetchEntries(nextPage);
+      await fetchEntries(nextPage, email);
       setPage(nextPage);
     }
   };
 
   const loadLess = async () => {
-    if (page > 0) {
+    if (hasPrev) {
+      // ✅ au lieu de page > 0
       const nextPage = page - 1;
-      await fetchEntries(nextPage);
+      await fetchEntries(nextPage, email);
       setPage(nextPage);
     }
   };
@@ -226,7 +231,19 @@ const _ = () => {
     setPage(0);
   }, [localLogin]);
 
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const resolvedEmail = user?.email ?? localLogin ?? null;
+      setEmail(resolvedEmail);
+      // ✅ passe resolvedEmail
+      if (resolvedEmail) fetchEntries(0, resolvedEmail);
+    });
+    return () => unsubscribe();
+  }, [localLogin]);
+
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
+  const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
 
   return (
     <View
@@ -361,9 +378,9 @@ const _ = () => {
                 style={{
                   display: "flex",
                   flexDirection: "row",
-                  marginHorizontal: 20,
-                  marginVertical: 2.5,
-                  padding: 5,
+                  marginHorizontal: isLandscape ? 5 : 20,
+                  marginVertical: isLandscape ? 1 : 2.5,
+                  padding: isLandscape ? 3 : 5,
                   justifyContent: "center",
                   alignItems: "center",
                   backgroundColor: pressed[i] ? "#534DB3" : "#BBB0D1",
@@ -444,7 +461,8 @@ const _ = () => {
                     containerColor="transparent"
                     size={20}
                     onPress={() => {
-                      deleteEntry(e.id);
+                      setEntryToDelete(e.id); // ← stocke le bon id
+                      showDialog();
                     }}
                   />
                 </View>
@@ -575,6 +593,37 @@ const _ = () => {
             </Portal>
           </>
         )}
+        {isLandscape && (
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {hasPrev && (
+              <CIconButton
+                style={{ alignSelf: "center", marginBottom: 40 }}
+                icon="chevron-left"
+                iconColor="#534DB3"
+                containerColor=""
+                size={25}
+                onPress={loadLess}
+              />
+            )}
+            {hasNext && (
+              <CIconButton
+                style={{ alignSelf: "center", marginBottom: 40 }}
+                icon="chevron-right"
+                iconColor="#534DB3"
+                containerColor=""
+                size={25}
+                onPress={loadMore}
+              />
+            )}
+          </View>
+        )}
       </ScrollView>
       {isLandscape && (
         <Text
@@ -597,21 +646,33 @@ const _ = () => {
           alignItems: "center",
         }}
       >
-        <CIconButton
-          icon="chevron-left"
-          iconColor="#534DB3"
-          containerColor=""
-          size={25}
-          onPress={loadLess}
-        />
-        <CIconButton
-          icon="chevron-right"
-          iconColor="#534DB3"
-          containerColor=""
-          size={25}
-          onPress={loadMore}
-        />
+        {!isLandscape && hasPrev && (
+          <CIconButton
+            icon="chevron-left"
+            iconColor="#534DB3"
+            containerColor=""
+            size={25}
+            onPress={loadLess}
+          />
+        )}
+        {!isLandscape && hasNext && (
+          <CIconButton
+            icon="chevron-right"
+            iconColor="#534DB3"
+            containerColor=""
+            size={25}
+            onPress={loadMore}
+          />
+        )}
       </View>
+      <CDialog
+        visibleDialog={visibleDialog}
+        setVisibleDialog={setVisibleDialog}
+        showDialog={showDialog}
+        hideDialog={hideDialog}
+        deleteEntry={deleteEntry}
+        idx={entryToDelete ?? -1}
+      />
     </View>
   );
 };

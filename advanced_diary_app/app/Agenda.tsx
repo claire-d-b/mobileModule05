@@ -51,7 +51,7 @@ const _ = ({ login }: Props) => {
   const [selectedEntry, setSelectedEntry] = React.useState<Entry | null>(null);
 
   const formatDate = (timestamp: string) => {
-    return new Date(timestamp).toISOString().split("T")[0]; // "2026-05-01"
+    return new Date(timestamp).toLocaleDateString("en-CA"); // "2026-05-01"
   };
 
   const formatDateFR = (date: Date): string => {
@@ -65,7 +65,11 @@ const _ = ({ login }: Props) => {
 
   const fetchEntriesByDate = async (selectedDate: Date, pageNumber = 0) => {
     if (!login) return;
-    const dateStr = selectedDate.toISOString().split("T")[0];
+    const dateStr = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+    ).toLocaleDateString("en-CA");
 
     try {
       const res = await fetch(

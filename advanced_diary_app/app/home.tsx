@@ -43,7 +43,12 @@ const _ = () => {
       focusedIcon: "account",
       unfocusedIcon: "account-outline",
     },
-    { key: "agenda", title: "Agenda", focusedIcon: "calendar" },
+    {
+      key: "agenda",
+      title: "Agenda",
+      focusedIcon: "calendar",
+      unfocusedIcon: "calendar-outline",
+    },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
@@ -51,6 +56,7 @@ const _ = () => {
     profile: ProfileRoute,
     agenda: AgendaRoute,
   });
+
   return (
     <SafeAreaView
       style={{ flex: 1 }}

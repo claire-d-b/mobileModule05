@@ -34,7 +34,7 @@ const _ = ({ page, date, setDate }: Props) => {
         monthTextColor: "#353172",
       }}
       markedDates={
-        date ? { [date.toISOString().split("T")[0]]: { selected: true } } : {}
+        date ? { [date.toLocaleDateString("en-CA")]: { selected: true } } : {}
       }
       onDayPress={(day) => {
         const selected = new Date(day.dateString);

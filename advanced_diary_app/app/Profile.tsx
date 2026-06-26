@@ -214,7 +214,7 @@ const Profile = ({ login }: Props) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+          date: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
           title,
           feeling,
           content,
@@ -286,6 +286,7 @@ const Profile = ({ login }: Props) => {
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
+            padding: isLandscape ? 10 : 0,
           }}
         >
           <CAvatar
