@@ -1,5 +1,12 @@
 import React, { useEffect } from "react";
-import { View, Text, Platform, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Platform,
+  Pressable,
+  ScrollView,
+  useWindowDimensions,
+} from "react-native";
 import { Button, IconButton, PaperProvider } from "react-native-paper";
 import {
   DatePickerModal,
@@ -39,6 +46,8 @@ interface Props {
 }
 
 const _ = ({ login }: Props) => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
   const [date, setDate] = React.useState<Date | undefined>(undefined);
   const [open, setOpen] = React.useState(false);
   const [entries, setEntries] = React.useState<Entry[]>([]);
@@ -103,6 +112,7 @@ const _ = ({ login }: Props) => {
           display: "flex",
           width: "100%",
           flex: 1,
+          flexDirection: isLandscape ? "row" : "column", // ← côte à côte en landscape
           justifyContent: "flex-start",
           alignItems: "center",
           padding: 10,

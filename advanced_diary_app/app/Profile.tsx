@@ -441,7 +441,7 @@ const Profile = ({ login }: Props) => {
                       icon={emotions[f - 1]}
                       iconColor="#534DB3"
                       containerColor="transparent"
-                      size={20}
+                      size={16}
                       onPress={() => {}}
                     />
                   )) || (

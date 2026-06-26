@@ -1,11 +1,6 @@
 import { useEffect } from "react";
 import { Calendar } from "react-native-calendars";
-import { Dimensions } from "react-native";
-
-const width = Math.min(
-  Dimensions.get("window").width - 50,
-  Dimensions.get("window").height - 50,
-);
+import { Dimensions, useWindowDimensions } from "react-native";
 
 interface Props {
   page: number;
@@ -15,13 +10,23 @@ interface Props {
 
 // Remplace le Button + DatePickerModal par :
 const _ = ({ page, date, setDate }: Props) => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const nwidth = isLandscape
+    ? Dimensions.get("window").width / 2
+    : Dimensions.get("window").width;
+
+  const nheight = isLandscape
+    ? height * 0.35 // ← 60% de la hauteur en landscape
+    : height * 0.45; // ← 45% de la hauteur en portrait
   return (
     <Calendar
       firstDay={1}
       style={{
         borderRadius: 10,
-        marginBottom: 10,
-        width,
+        // marginBottom: 10,
+        width: nwidth,
+        height: nheight,
       }}
       theme={{
         backgroundColor: "#ffffff",
