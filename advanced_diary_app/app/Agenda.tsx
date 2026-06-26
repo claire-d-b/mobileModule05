@@ -9,7 +9,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";
-import CTouchableRipple from "./CTouchableRipple";
 import CModal from "./CModal";
 import CTextInput from "./CTextInput";
 import CCalendar from "./CCalendar";
