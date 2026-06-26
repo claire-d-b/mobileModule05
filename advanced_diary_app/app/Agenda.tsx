@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import {
   registerTranslation,
   en,
 } from "react-native-paper-dates";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useAuthContext } from "../context/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";
@@ -48,6 +50,12 @@ interface Props {
 const _ = ({ login }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+
+  const { localLogin } = useAuthContext();
+
+  const auth = getAuth();
+  const [email, setEmail] = useState<string | null>(localLogin ?? null);
+
   const [date, setDate] = React.useState<Date | undefined>(undefined);
   const [open, setOpen] = React.useState(false);
   const [entries, setEntries] = React.useState<Entry[]>([]);
@@ -100,10 +108,40 @@ const _ = ({ login }: Props) => {
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
+  // const fetchEntries = async (
+  //   pageNumber = 0,
+  //   resolvedEmail?: string | null,
+  // ) => {
+  //   const emailToUse = resolvedEmail ?? email;
+  //   if (!emailToUse) return;
+
+  //   try {
+  //     const res = await fetch(
+  //       `${backendUrl}/entries/${encodeURIComponent(emailToUse)}?page=${pageNumber}`,
+  //     );
+  //     const data = await res.json();
+  //     if (!res.ok) return;
+
+  //     const list: Entry[] = data.entries ?? [];
+  //     setEntries(list);
+  //   } catch (err) {
+  //     console.error("❌ Error fetching entries:", err);
+  //   }
+  // };
+
   useEffect(() => {
     fetchEntriesByDate(date ?? new Date(), page);
     // setDate(date);
-  }, [page, date]);
+  }, [date]);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const resolvedEmail = user?.email ?? localLogin ?? null;
+      setEmail(resolvedEmail);
+    });
+    return () => unsubscribe();
+  }, [localLogin]);
 
   return (
     <View style={{ width: "100%", flex: 1 }}>
@@ -119,114 +157,129 @@ const _ = ({ login }: Props) => {
         }}
       >
         <CCalendar page={page} date={date ?? new Date()} setDate={setDate} />
-        {entries && entries.length > 0 && (
-          <Text style={{ color: "#534DB3" }}>
-            Scroll down to see next entries.
-          </Text>
-        )}
-        <ScrollView style={{ width: "100%", flex: 1 }}>
-          {(entries &&
-            entries.length > 0 &&
-            entries.map((e, i) => {
-              return (
-                <View
-                  key={`entry_agenda_${i}`}
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    // marginHorizontal: 20,
-                    margin: 5,
-                    // marginHorizontal: 20,
-                    padding: 5,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: "#BBB0D1",
-                    borderRadius: 10,
-                  }}
-                >
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {entries && entries.length > 0 && (
+            <Text
+              style={{
+                color: "#534DB3",
+                alignSelf: "flex-start",
+                marginLeft: 10,
+              }}
+            >
+              Scroll down to see next entries.
+            </Text>
+          )}
+          <ScrollView style={{ flex: 1 }}>
+            {(entries &&
+              entries.length > 0 &&
+              entries.map((e, i) => {
+                return (
                   <View
+                    key={`entry_agenda_${i}`}
                     style={{
-                      width: "100%",
+                      display: "flex",
                       flexDirection: "row",
+                      // marginHorizontal: 20,
+                      margin: 5,
+                      // marginHorizontal: 20,
+                      padding: 5,
                       justifyContent: "center",
                       alignItems: "center",
+                      backgroundColor: "#BBB0D1",
+                      borderRadius: 10,
                     }}
                   >
-                    <Pressable
-                      onPress={() => {
-                        setSelectedEntry(e); // ← stocke l'entrée
-                        showModal(); // ← ouvre la modal
+                    <View
+                      style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
                       }}
                     >
-                      <View
-                        key={`touchable_${i}`}
-                        style={{
-                          width: "100%",
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          alignItems: "center",
+                      <Pressable
+                        onPress={() => {
+                          setSelectedEntry(e); // ← stocke l'entrée
+                          showModal(); // ← ouvre la modal
                         }}
                       >
                         <View
+                          key={`touchable_${i}`}
                           style={{
-                            backgroundColor: "white",
-                            borderRadius: 10,
-                            margin: 5,
+                            width: "100%",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
                           }}
                         >
-                          <CChip
+                          <View
+                            style={{
+                              backgroundColor: "white",
+                              borderRadius: 10,
+                              margin: 5,
+                            }}
+                          >
+                            <CChip
+                              theme={{
+                                colors: {
+                                  surfaceDisabled: "#BBB0D1",
+                                  onSurfaceDisabled: "#534DB3",
+                                } as any,
+                              }}
+                              onPress={() => {}}
+                              label=""
+                              mode="outlined"
+                              style={{ padding: 5 }}
+                              textStyle={{ color: "#534DB3" }}
+                              icon=""
+                              disabled={true}
+                            >
+                              <Text>{formatDateFR(new Date(e.date))}</Text>
+                            </CChip>
+                          </View>
+                          <CIconButton
+                            icon={emotions[(e.feeling ?? 3) - 1]}
+                            iconColor="#534DB3"
+                            containerColor=""
+                            size={20}
+                            onPress={() => {}}
+                            disabled={true}
                             theme={{
                               colors: {
-                                surfaceDisabled: "#BBB0D1",
-                                onSurfaceDisabled: "#534DB3",
-                              } as any,
+                                onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
+                              },
                             }}
-                            onPress={() => {}}
-                            label=""
-                            mode="outlined"
-                            style={{ padding: 5 }}
-                            textStyle={{ color: "#534DB3" }}
-                            icon=""
-                            disabled={true}
+                          />
+                          <Text
+                            style={{
+                              flex: 1,
+                              color: "#353172",
+                              paddingRight: 5,
+                            }}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
                           >
-                            <Text>{formatDateFR(new Date(e.date))}</Text>
-                          </CChip>
+                            {e.title}
+                          </Text>
                         </View>
-                        <CIconButton
-                          icon={emotions[(e.feeling ?? 3) - 1]}
-                          iconColor="#534DB3"
-                          containerColor=""
-                          size={20}
-                          onPress={() => {}}
-                          disabled={true}
-                          theme={{
-                            colors: {
-                              onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
-                            },
-                          }}
-                        />
-                        <Text
-                          style={{
-                            flex: 1,
-                            color: "#353172",
-                            paddingRight: 5,
-                          }}
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                        >
-                          {e.title}
-                        </Text>
-                      </View>
-                    </Pressable>
+                      </Pressable>
+                    </View>
                   </View>
-                </View>
-              );
-            })) || (
-            <Text style={{ color: "#353172", textAlign: "center" }}>
-              No entry found
-            </Text>
-          )}
-        </ScrollView>
+                );
+              })) || (
+              <Text style={{ color: "#353172", textAlign: "center" }}>
+                No entry found
+              </Text>
+            )}
+          </ScrollView>
+        </View>
       </View>
     </View>
   );

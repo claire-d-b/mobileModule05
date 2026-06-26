@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import { useNavigation } from "expo-router";
 import { View, Platform, useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -63,8 +63,22 @@ const Profile = ({ login }: Props) => {
   const isLandscape = width > height;
 
   const { localLogin, setLocalLogin } = useAuthContext();
-  const firebaseEmail = getAuth().currentUser?.email;
-  const email = firebaseEmail ?? localLogin;
+
+  const auth = getAuth();
+  const [email, setEmail] = useState<string | null>(localLogin ?? null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const resolvedEmail = user?.email ?? localLogin ?? null;
+      setEmail(resolvedEmail);
+      // ✅ passe resolvedEmail
+      if (resolvedEmail) fetchEntries(0, resolvedEmail);
+    });
+    return () => unsubscribe();
+  }, [localLogin]);
+  // const firebaseEmail = getAuth().currentUser?.email;
+  // const email = firebaseEmail ?? localLogin;
 
   useEffect(() => {
     if (!email) return;
@@ -97,25 +111,25 @@ const Profile = ({ login }: Props) => {
   // ;
   console.log();
 
-  const fetchEntries = async (pageNumber = 0) => {
-    if (!login) return;
+  const fetchEntries = async (
+    pageNumber = 0,
+    resolvedEmail?: string | null,
+  ) => {
+    const emailToUse = resolvedEmail ?? email;
+    if (!emailToUse) return;
 
-    const res = await fetch(
-      `${backendUrl}/entries/${encodeURIComponent(login)}?page=${pageNumber}`,
-    );
-
-    const text = await res.text();
-
-    let data;
     try {
-      data = JSON.parse(text);
-    } catch {
-      console.log("❌ backend not JSON:", text);
-      return;
-    }
+      const res = await fetch(
+        `${backendUrl}/entries/${encodeURIComponent(emailToUse)}?page=${pageNumber}`,
+      );
+      const data = await res.json();
+      if (!res.ok) return;
 
-    setEntries(Array.isArray(data) ? data : (data.entries ?? []));
-    setTotalPages(data.totalPages ?? 0);
+      const list: Entry[] = data.entries ?? [];
+      setEntries(list);
+    } catch (err) {
+      console.error("❌ Error fetching entries:", err);
+    }
   };
 
   interface Stats {
@@ -163,24 +177,6 @@ const Profile = ({ login }: Props) => {
     }
   };
 
-  const deleteEntry = async (id: number) => {
-    try {
-      const res = await fetch(`${backendUrl}/entries/${id}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        console.error("❌ Failed to delete entry:", data.error);
-        return;
-      }
-      console.log("✅ Entry deleted:", data.entry);
-      await fetchEntries(page); // ← recharge la page courante
-      fetchCount();
-    } catch (err) {
-      console.error("❌ Error deleting entry:", err);
-    }
-  };
-
   const formatDateFR = (date: Date): string => {
     return date.toLocaleDateString("fr-FR", {
       weekday: "short",
@@ -198,52 +194,6 @@ const Profile = ({ login }: Props) => {
     router.replace("/");
   };
 
-  const handleSubmit = async () => {
-    setMessage("");
-    if (!title || !content) {
-      setMessage("Please provide a title and content.");
-      setType("error");
-      return;
-    }
-    console.log("📡 auth.currentUser:", login);
-    console.log("📡 email utilisé:", email);
-
-    try {
-      const res = await fetch(`${backendUrl}/entries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          date: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
-          title,
-          feeling,
-          content,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("❌ Failed to create entry:", data.error);
-        return;
-      }
-
-      console.log("✅ Entry created:", data);
-      setMessage("Entry successfully created!");
-      setType("success");
-
-      // Reset
-      setTitle("");
-      setContent("");
-      setFeeling(3);
-      await fetchEntries(0);
-      fetchCount();
-      // hideModal();
-    } catch (err) {
-      console.error("❌ Error creating entry:", err);
-    }
-  };
-
   useEffect(() => {
     setType("");
     if (!login) return;
@@ -257,7 +207,6 @@ const Profile = ({ login }: Props) => {
   useEffect(() => {
     fetchStats();
   }, [entries]);
-  // percentages = { 1: 20, 2: 30, 3: 10, 4: 25, 5: 15 }
 
   return (
     <View
