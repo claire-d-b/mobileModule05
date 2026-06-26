@@ -27,7 +27,7 @@ const _ = () => {
 
   const ProfileRoute = () => <Profile login={localLogin} />;
   const AgendaRoute = () => <Agenda login={localLogin} />;
-  const HomeRoute = () => <Entries />; // ← ton composant actuel sans CBottomNav
+  const HomeRoute = () => <Entries login={localLogin} />; // ← ton composant actuel sans CBottomNav
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([

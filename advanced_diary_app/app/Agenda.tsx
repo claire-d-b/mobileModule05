@@ -51,10 +51,10 @@ const _ = ({ login }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  const { localLogin } = useAuthContext();
+  // const { localLogin } = useAuthContext();
 
   const auth = getAuth();
-  const [email, setEmail] = useState<string | null>(localLogin ?? null);
+  const [email, setEmail] = useState<string | null>(login ?? null);
 
   const [date, setDate] = React.useState<Date | undefined>(undefined);
   const [open, setOpen] = React.useState(false);
@@ -108,27 +108,6 @@ const _ = ({ login }: Props) => {
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
-  // const fetchEntries = async (
-  //   pageNumber = 0,
-  //   resolvedEmail?: string | null,
-  // ) => {
-  //   const emailToUse = resolvedEmail ?? email;
-  //   if (!emailToUse) return;
-
-  //   try {
-  //     const res = await fetch(
-  //       `${backendUrl}/entries/${encodeURIComponent(emailToUse)}?page=${pageNumber}`,
-  //     );
-  //     const data = await res.json();
-  //     if (!res.ok) return;
-
-  //     const list: Entry[] = data.entries ?? [];
-  //     setEntries(list);
-  //   } catch (err) {
-  //     console.error("❌ Error fetching entries:", err);
-  //   }
-  // };
-
   useEffect(() => {
     fetchEntriesByDate(date ?? new Date(), page);
     // setDate(date);
@@ -137,19 +116,18 @@ const _ = ({ login }: Props) => {
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const resolvedEmail = user?.email ?? localLogin ?? null;
+      const resolvedEmail = user?.email ?? login ?? null;
       setEmail(resolvedEmail);
     });
     return () => unsubscribe();
-  }, [localLogin]);
+  }, [login]);
 
   return (
     <View style={{ width: "100%", flex: 1 }}>
       <View
         style={{
-          display: "flex",
-          width: "100%",
           flex: 1,
+          width: "100%",
           flexDirection: isLandscape ? "row" : "column", // ← côte à côte en landscape
           justifyContent: "flex-start",
           alignItems: "center",
@@ -159,10 +137,7 @@ const _ = ({ login }: Props) => {
         <CCalendar page={page} date={date ?? new Date()} setDate={setDate} />
         <View
           style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            flex: 1,
           }}
         >
           {entries && entries.length > 0 && (

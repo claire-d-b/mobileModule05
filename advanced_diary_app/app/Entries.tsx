@@ -53,23 +53,22 @@ interface PaginatedResponse {
   hasPrev: boolean;
 }
 
-interface Props {
-  setEntries: [];
-}
-
 const getEllipsis = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + "...";
 };
 
-const _ = () => {
+interface Props {
+  login: string | null;
+}
+
+const _ = ({ login }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
   const [hasNext, setHasNext] = useState(false);
   const [hasPrev, setHasPrev] = useState(false);
 
-  const { localLogin } = useAuthContext();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [feeling, setFeeling] = useState(1);
@@ -105,7 +104,7 @@ const _ = () => {
   };
 
   const auth = getAuth();
-  const [email, setEmail] = useState<string | null>(localLogin ?? null);
+  const [email, setEmail] = useState<string | null>(login ?? null);
 
   const formatDate = (timestamp: string) => {
     if (!timestamp) return "";
@@ -229,18 +228,7 @@ const _ = () => {
   useEffect(() => {
     fetchEntries(page);
     setPage(0);
-  }, [localLogin]);
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const resolvedEmail = user?.email ?? localLogin ?? null;
-      setEmail(resolvedEmail);
-      // ✅ passe resolvedEmail
-      if (resolvedEmail) fetchEntries(0, resolvedEmail);
-    });
-    return () => unsubscribe();
-  }, [localLogin]);
+  }, [login]);
 
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
