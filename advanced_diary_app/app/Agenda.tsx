@@ -134,7 +134,16 @@ const _ = ({ login }: Props) => {
           padding: 10,
         }}
       >
-        <CCalendar page={page} date={date ?? new Date()} setDate={setDate} />
+        <View
+          style={{
+            width: 350,
+            height: 300,
+            overflow: "hidden",
+            borderRadius: 10,
+          }}
+        >
+          <CCalendar page={page} date={date ?? new Date()} setDate={setDate} />
+        </View>
         <View
           style={{
             flex: 1,
@@ -146,6 +155,7 @@ const _ = ({ login }: Props) => {
                 color: "#534DB3",
                 alignSelf: "flex-start",
                 marginLeft: 10,
+                marginTop: 40,
               }}
             >
               Scroll down to see next entries.
@@ -163,6 +173,7 @@ const _ = ({ login }: Props) => {
                       flexDirection: "row",
                       // marginHorizontal: 20,
                       margin: 5,
+                      marginRight: 80,
                       // marginHorizontal: 20,
                       padding: 5,
                       justifyContent: "center",

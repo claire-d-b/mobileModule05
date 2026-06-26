@@ -10,23 +10,11 @@ interface Props {
 
 // Remplace le Button + DatePickerModal par :
 const _ = ({ page, date, setDate }: Props) => {
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
-  const nwidth = isLandscape
-    ? Dimensions.get("window").width / 2
-    : Dimensions.get("window").width;
-
-  const nheight = isLandscape
-    ? height * 0.35 // ← 60% de la hauteur en landscape
-    : height * 0.45; // ← 45% de la hauteur en portrait
   return (
     <Calendar
       firstDay={1}
       style={{
-        borderRadius: 10,
-        // marginBottom: 10,
-        width: nwidth,
-        height: nheight,
+        width: 350,
       }}
       theme={{
         backgroundColor: "#ffffff",

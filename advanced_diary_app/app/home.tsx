@@ -58,20 +58,13 @@ const _ = () => {
   });
 
   return (
-    <SafeAreaView
-      style={{ flex: 1 }}
-      edges={["top", "bottom", "left", "right"]}
-    >
-      <PaperProvider>
-        <CBottomNav
-          style={{ backgroundColor: "white" }}
-          index={index}
-          setIndex={setIndex}
-          routes={routes}
-          renderScene={renderScene}
-        />
-      </PaperProvider>
-    </SafeAreaView>
+    <CBottomNav
+      style={{ backgroundColor: "white" }}
+      index={index}
+      setIndex={setIndex}
+      routes={routes}
+      renderScene={renderScene}
+    />
   );
 };
 
