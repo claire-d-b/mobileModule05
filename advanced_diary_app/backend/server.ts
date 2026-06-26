@@ -307,13 +307,19 @@ app.post(
 // GET ENTRIES FOR USER
 app.get("/entries/:email", async (req, res) => {
   const { email } = req.params;
-
-  // optional: page comes from query params
   const page = Number(req.query.page ?? 0);
   const limit = 6;
   const offset = page * limit;
 
   try {
+    const countResult = await pool.query(
+      `SELECT COUNT(*) FROM diary_entries e
+       JOIN users u ON e.user_id = u.id
+       WHERE u.login = $1`,
+      [email],
+    );
+    const total = Number(countResult.rows[0].count);
+
     const result = await pool.query(
       `SELECT e.* FROM diary_entries e
        JOIN users u ON e.user_id = u.id
@@ -323,9 +329,12 @@ app.get("/entries/:email", async (req, res) => {
       [email, limit, offset],
     );
 
-    res.json(result.rows);
+    res.json({
+      entries: result.rows,
+      hasNext: offset + limit < total,
+      hasPrev: page > 0,
+    });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Failed to fetch entries" });
   }
 });
@@ -418,19 +427,36 @@ app.get(
   "/entries/:email/date/:date",
   async (req: Request<{ email: string; date: string }>, res: Response) => {
     const { email, date } = req.params;
+    const page = Number(req.query.page ?? 0);
+    const limit = 4;
+    const offset = page * limit;
 
     try {
+      // Count total pour la pagination
+      const countResult = await pool.query(
+        `SELECT COUNT(*) FROM diary_entries e
+         JOIN users u ON e.user_id = u.id
+         WHERE u.login = $1 AND e.date = $2`,
+        [email, date],
+      );
+      const total = parseInt(countResult.rows[0].count);
+
       const result = await pool.query(
         `SELECT e.* FROM diary_entries e
          JOIN users u ON e.user_id = u.id
          WHERE u.login = $1 AND e.date = $2
-         ORDER BY e.created_at DESC`,
-        [email, date],
+         ORDER BY e.created_at DESC
+         LIMIT $3 OFFSET $4`,
+        [email, date, limit, offset],
       );
 
       res.json({
         entries: result.rows,
-        total: result.rows.length,
+        page,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: offset + limit < total,
+        hasPrev: page > 0,
       });
     } catch (err) {
       console.error(err);

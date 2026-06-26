@@ -13,8 +13,10 @@ const pool = new Pool({
 
 const seedTestUser = async (): Promise<void> => {
   try {
-    console.log("🌱 Seeding test user...");
-    const hashedPassword = await bcrypt.hash("Test1234", 10);
+    const testPassword = process.env.TEST_USER_PASSWORD;
+    if (!testPassword) throw new Error("Missing TEST_USER_PASSWORD in .env");
+    const hashedPassword = await bcrypt.hash(testPassword, 10);
+
     const userResult = await pool.query(
       `INSERT INTO users (login, password, provider)
        VALUES ($1, $2, 'local')
@@ -173,13 +175,6 @@ const seedTestUser = async (): Promise<void> => {
     }
 
     console.log(`✅ ${entries.length} diary entries inserted`);
-    console.log("✅ Seeding complete");
-    console.log("─────────────────────────────");
-    console.log("  login:    test_user");
-    console.log("  password: Test1234");
-    console.log("─────────────────────────────");
-    console.log("  📅 10 entries on 2026-05-15 for pagination testing");
-    console.log("─────────────────────────────");
   } catch (err) {
     console.error("❌ Seeding failed:", err);
   } finally {

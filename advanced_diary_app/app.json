@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "orientation": "default",
+    "name": "advanced_diary_app",
+    "slug": "advanced_diary_app",
+    "owner": "claire-d-b",
+    "version": "1.0.0",
+    "scheme": "com.anonymous.diaryapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "orientation": "default",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.diaryapp"
+    },
+    "android": {
+      "orientation": "default",
+      "usesCleartextTraffic": true,
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.diaryapp",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "com.anonymous.diaryapp"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      "expo-screen-orientation",
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ebcd0a5d-28a0-4970-ac83-ec5cc109c0b9"
+      }
+    }
+  }
+}

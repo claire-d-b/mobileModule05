@@ -106,7 +106,7 @@ const _ = ({ login }: Props) => {
         }}
       >
         <CCalendar page={page} date={date ?? new Date()} setDate={setDate} />
-        {entries && entries.length && (
+        {entries && entries.length > 0 && (
           <Text style={{ color: "#534DB3" }}>
             Scroll down to see next entries.
           </Text>
