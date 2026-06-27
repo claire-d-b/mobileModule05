@@ -239,7 +239,7 @@ const _ = ({ login }: Props) => {
         display: "flex",
         width: "100%",
         flex: 1,
-        paddingVertical: 20,
+        // paddingVertical: 20,
         flexDirection: "column",
         justifyContent: "space-around",
         alignItems: "center",
@@ -346,8 +346,7 @@ const _ = ({ login }: Props) => {
           display: "flex",
           flexDirection: isLandscape ? "row" : "column",
           width: "100%",
-          flex: 1,
-          // height: "100%",
+          // flex: 1,
           padding: 10,
           // flexGrow: 0,
         }}
@@ -581,37 +580,6 @@ const _ = ({ login }: Props) => {
             </Portal>
           </>
         )}
-        {isLandscape && (
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            {hasPrev && (
-              <CIconButton
-                style={{ alignSelf: "center", marginBottom: 40 }}
-                icon="chevron-left"
-                iconColor="#534DB3"
-                containerColor=""
-                size={25}
-                onPress={loadLess}
-              />
-            )}
-            {hasNext && (
-              <CIconButton
-                style={{ alignSelf: "center", marginBottom: 40 }}
-                icon="chevron-right"
-                iconColor="#534DB3"
-                containerColor=""
-                size={25}
-                onPress={loadMore}
-              />
-            )}
-          </View>
-        )}
       </ScrollView>
       {isLandscape && (
         <Text
@@ -626,6 +594,55 @@ const _ = ({ login }: Props) => {
           {`Scroll on the right to see next 6 entries. Click below to get newer (<) or older (>) entries.`}
         </Text>
       )}
+      {isLandscape && (
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {hasPrev && (
+            <CIconButton
+              style={{ alignSelf: "center", marginBottom: 40 }}
+              icon="chevron-left"
+              iconColor="#534DB3"
+              containerColor=""
+              size={25}
+              onPress={loadLess}
+            />
+          )}
+          {hasNext && (
+            <CIconButton
+              style={{ alignSelf: "center", marginBottom: 40 }}
+              icon="chevron-right"
+              iconColor="#534DB3"
+              containerColor=""
+              size={25}
+              onPress={loadMore}
+            />
+          )}
+        </View>
+      )}
+      {!isLandscape && hasPrev && (
+        <CIconButton
+          icon="chevron-left"
+          iconColor="#534DB3"
+          containerColor=""
+          size={25}
+          onPress={loadLess}
+        />
+      )}
+      {!isLandscape && hasNext && (
+        <CIconButton
+          icon="chevron-right"
+          iconColor="#534DB3"
+          containerColor=""
+          size={25}
+          onPress={loadMore}
+        />
+      )}
       <View
         style={{
           display: "flex",
@@ -633,26 +650,7 @@ const _ = ({ login }: Props) => {
           justifyContent: "space-around",
           alignItems: "center",
         }}
-      >
-        {!isLandscape && hasPrev && (
-          <CIconButton
-            icon="chevron-left"
-            iconColor="#534DB3"
-            containerColor=""
-            size={25}
-            onPress={loadLess}
-          />
-        )}
-        {!isLandscape && hasNext && (
-          <CIconButton
-            icon="chevron-right"
-            iconColor="#534DB3"
-            containerColor=""
-            size={25}
-            onPress={loadMore}
-          />
-        )}
-      </View>
+      ></View>
       <CDialog
         visibleDialog={visibleDialog}
         setVisibleDialog={setVisibleDialog}
