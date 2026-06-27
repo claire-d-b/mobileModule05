@@ -51,6 +51,23 @@ const _ = ({ login }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
+  const [visibleDialog, setVisibleDialog] = useState(false);
+  const showDialog = () => setVisibleDialog(true);
+  const hideDialog = () => setVisibleDialog(false);
+
+  const [details, setDetails] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const hideDetails = () => {
+    setSelectedIndex(null);
+    setDetails(false);
+  };
+  const showDetails = () => setDetails(true);
+  const [pressed, setPressed] = useState<boolean[]>([false]);
+  const [entries, setEntries] = useState<Entry[]>([]);
+
+  const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
+  const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
+
   // const { localLogin } = useAuthContext();
 
   const auth = getAuth();
@@ -58,14 +75,11 @@ const _ = ({ login }: Props) => {
 
   const [date, setDate] = React.useState<Date | undefined>(undefined);
   const [open, setOpen] = React.useState(false);
-  const [entries, setEntries] = React.useState<Entry[]>([]);
 
   const [page, setPage] = React.useState(0);
   const [totalPages, setTotalPages] = React.useState(0);
 
   const [totalNbOfEntries, setTotalNbOfEntries] = React.useState(0);
-
-  const [selectedEntry, setSelectedEntry] = React.useState<Entry | null>(null);
 
   const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleDateString("en-CA"); // "2026-05-01"
@@ -191,12 +205,7 @@ const _ = ({ login }: Props) => {
                         alignItems: "center",
                       }}
                     >
-                      <Pressable
-                        onPress={() => {
-                          setSelectedEntry(e); // ← stocke l'entrée
-                          showModal(); // ← ouvre la modal
-                        }}
-                      >
+                      <View>
                         <View
                           key={`touchable_${i}`}
                           style={{
@@ -255,8 +264,37 @@ const _ = ({ login }: Props) => {
                           >
                             {e.title}
                           </Text>
+                          <View
+                            style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              justifyContent: "flex-end",
+                              alignItems: "center",
+                            }}
+                          >
+                            <CIconButton
+                              icon="eye-outline"
+                              iconColor={pressed[i] ? "white" : "#534DB3"}
+                              containerColor="transparent"
+                              size={20}
+                              onPress={() => {
+                                setSelectedIndex(i); // ← add this
+                                showDetails();
+                              }}
+                            />
+                            <CIconButton
+                              icon="trash-can-outline"
+                              iconColor={pressed[i] ? "white" : "#534DB3"}
+                              containerColor="transparent"
+                              size={20}
+                              onPress={() => {
+                                setEntryToDelete(e.id); // ← stocke le bon id
+                                showDialog();
+                              }}
+                            />
+                          </View>
                         </View>
-                      </Pressable>
+                      </View>
                     </View>
                   </View>
                 );

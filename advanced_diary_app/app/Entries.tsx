@@ -625,23 +625,34 @@ const _ = ({ login }: Props) => {
           )}
         </View>
       )}
-      {!isLandscape && hasPrev && (
-        <CIconButton
-          icon="chevron-left"
-          iconColor="#534DB3"
-          containerColor=""
-          size={25}
-          onPress={loadLess}
-        />
-      )}
-      {!isLandscape && hasNext && (
-        <CIconButton
-          icon="chevron-right"
-          iconColor="#534DB3"
-          containerColor=""
-          size={25}
-          onPress={loadMore}
-        />
+      {!isLandscape && (
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {hasPrev && (
+            <CIconButton
+              icon="chevron-left"
+              iconColor="#534DB3"
+              containerColor=""
+              size={25}
+              onPress={loadLess}
+            />
+          )}
+          {hasNext && (
+            <CIconButton
+              icon="chevron-right"
+              iconColor="#534DB3"
+              containerColor=""
+              size={25}
+              onPress={loadMore}
+            />
+          )}
+        </View>
       )}
       <View
         style={{
