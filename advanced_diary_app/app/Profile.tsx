@@ -22,7 +22,7 @@ import CModal from "./CModal";
 import CAvatar from "./CAvatar";
 import CDialog from "./CDialog";
 import Loading from "./loading";
-const nbOfEntriesPerPage = 6;
+import { formatDate, formatDateEN } from "../utils/utils";
 
 const emotions = [
   "emoticon",
@@ -109,14 +109,6 @@ const Profile = ({ login }: Props) => {
     borderRadius: 10,
   };
 
-  const formatDate = (timestamp: string) => {
-    return new Date(timestamp).toLocaleDateString("en-CA"); // "2026-05-01"
-  };
-  // const auth = getAuth();
-  // const email = auth.currentUser?.email ??
-  // ;
-  console.log();
-
   const fetchEntries = async (
     pageNumber = 0,
     resolvedEmail?: string | null,
@@ -200,15 +192,6 @@ const Profile = ({ login }: Props) => {
     } catch (err) {
       console.error("❌ Error deleting entry:", err);
     }
-  };
-
-  const formatDateFR = (date: Date): string => {
-    return date.toLocaleDateString("fr-FR", {
-      weekday: "short",
-      day: "numeric",
-      month: "long",
-      year: "2-digit",
-    });
   };
 
   const logout = async () => {
@@ -336,7 +319,7 @@ const Profile = ({ login }: Props) => {
                         icon=""
                         disabled={true}
                       >
-                        {formatDateFR(new Date(e.date))}
+                        {formatDateEN(new Date(e.date))}
                       </CChip>
                     </View>
                     <CIconButton

@@ -1,35 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Platform,
-  Pressable,
-  ScrollView,
-  useWindowDimensions,
-} from "react-native";
-import {
-  Button,
-  IconButton,
-  PaperProvider,
-  Modal,
-  Portal,
-} from "react-native-paper";
-import {
-  DatePickerModal,
-  registerTranslation,
-  en,
-} from "react-native-paper-dates";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useAuthContext } from "../context/AuthContext";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, ScrollView, useWindowDimensions } from "react-native";
+import { Modal, Portal } from "react-native-paper";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";
-import CModal from "./CModal";
-import CTextInput from "./CTextInput";
 import CCalendar from "./CCalendar";
 import CDialog from "./CDialog";
-
-registerTranslation("en", en);
+import { formatDate, formatDateEN } from "../utils/utils";
 
 const backendUrl = "http://192.168.1.12:3000";
 
@@ -84,33 +60,12 @@ const _ = ({ login }: Props) => {
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
 
-  const auth = getAuth();
-  const [email, setEmail] = useState<string | null>(login ?? null);
-
   const [date, setDate] = React.useState<Date | undefined>(undefined);
-  const [open, setOpen] = React.useState(false);
 
   const [page, setPage] = React.useState(0);
-  const [totalPages, setTotalPages] = React.useState(0);
-
-  const [totalNbOfEntries, setTotalNbOfEntries] = React.useState(0);
-
-  const formatDate = (timestamp: string) => {
-    return new Date(timestamp).toLocaleDateString("en-CA"); // "2026-05-01"
-  };
-
-  const formatDateFR = (date: Date): string => {
-    return date.toLocaleDateString("fr-FR", {
-      weekday: "short",
-      day: "numeric",
-      month: "long",
-      year: "2-digit",
-    });
-  };
 
   const loadMore = async () => {
     if (hasNext) {
-      // ✅ au lieu de page < totalPages
       const nextPage = page + 1;
       await fetchEntriesByDate(date ?? new Date(), nextPage); // ← nextPage pas page
       setPage(nextPage);
@@ -119,7 +74,6 @@ const _ = ({ login }: Props) => {
 
   const loadLess = async () => {
     if (hasPrev) {
-      // ✅ au lieu de page > 0
       const nextPage = page - 1;
       await fetchEntriesByDate(date ?? new Date(), nextPage); // ← nextPage pas page
       setPage(nextPage);
@@ -142,11 +96,10 @@ const _ = ({ login }: Props) => {
       if (!res.ok) return;
 
       setEntries(data.entries ?? []);
-      console.log(data.entries.length);
-      setTotalPages(data.totalPages ?? 0);
+      // console.log(data.entries.length);
       setPage(data.page ?? 0);
-      setHasNext(data.hasNext ?? false); // ← ajoute
-      setHasPrev(data.hasPrev ?? false); // ← ajoute
+      setHasNext(data.hasNext ?? false);
+      setHasPrev(data.hasPrev ?? false);
     } catch (err) {
       console.error("❌ Error fetching entries by date:", err);
     }
@@ -169,10 +122,6 @@ const _ = ({ login }: Props) => {
     }
   };
 
-  const [visible, setVisible] = React.useState(false);
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
-
   useEffect(() => {
     fetchEntriesByDate(date ?? new Date(), page);
   }, [date, login]);
@@ -193,7 +142,6 @@ const _ = ({ login }: Props) => {
           style={{
             width: 275,
             height: 275,
-            // padding: 5,
             overflow: "hidden",
             borderRadius: 10,
           }}
@@ -227,10 +175,8 @@ const _ = ({ login }: Props) => {
                     style={{
                       display: "flex",
                       flexDirection: "row",
-                      // marginHorizontal: 20,
                       margin: 5,
                       marginHorizontal: isLandscape ? 80 : 20,
-                      // marginHorizontal: 20,
                       padding: 5,
                       justifyContent: "center",
                       alignItems: "center",
@@ -278,7 +224,7 @@ const _ = ({ login }: Props) => {
                               icon=""
                               disabled={true}
                             >
-                              <Text>{formatDateFR(new Date(e.date))}</Text>
+                              <Text>{formatDateEN(new Date(e.date))}</Text>
                             </CChip>
                           </View>
                           <CIconButton
@@ -404,7 +350,6 @@ const _ = ({ login }: Props) => {
                         paddingBottom: 10,
                         paddingLeft: 20,
                         paddingRight: 20,
-                        // height: "100%",
                       }}
                     >
                       <View
