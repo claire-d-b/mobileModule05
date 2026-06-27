@@ -31,7 +31,7 @@ import CDialog from "./CDialog";
 
 registerTranslation("en", en);
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "http://192.168.1.12:3000";
 
 const emotions = [
   "emoticon",
@@ -217,18 +217,28 @@ const _ = ({ login }: Props) => {
             flex: 1,
           }}
         >
-          {entries && entries.length > 0 && (
+          {(entries && isLandscape && entries.length >= 4 && (
             <Text
               style={{
                 color: "#534DB3",
-                alignSelf: "flex-start",
-                marginLeft: 10,
+                alignSelf: "center",
+                marginHorizontal: 20,
                 marginTop: 40,
               }}
             >
               Scroll down to see next entries.
             </Text>
-          )}
+          )) ||
+            (entries && !isLandscape && entries.length >= 4 && (
+              <Text
+                style={{
+                  color: "#534DB3",
+                  alignSelf: "center",
+                  marginHorizontal: 20,
+                  marginTop: 40,
+                }}
+              >{`Scroll down and click below to get newer (<) or older (>) entries.`}</Text>
+            ))}
           <ScrollView style={{ flex: 1 }}>
             {(entries &&
               entries.length > 0 &&
@@ -241,7 +251,7 @@ const _ = ({ login }: Props) => {
                       flexDirection: "row",
                       // marginHorizontal: 20,
                       margin: 5,
-                      marginRight: isLandscape ? 80 : 20,
+                      marginHorizontal: isLandscape ? 80 : 20,
                       // marginHorizontal: 20,
                       padding: 5,
                       justifyContent: "center",
