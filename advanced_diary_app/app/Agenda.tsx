@@ -64,6 +64,9 @@ const _ = ({ login }: Props) => {
     borderRadius: 10,
   };
 
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrev, setHasPrev] = useState(false);
+
   const [visibleDialog, setVisibleDialog] = useState(false);
   const showDialog = () => setVisibleDialog(true);
   const hideDialog = () => setVisibleDialog(false);
@@ -107,6 +110,24 @@ const _ = ({ login }: Props) => {
     });
   };
 
+  const loadMore = async () => {
+    if (hasNext) {
+      // ✅ au lieu de page < totalPages
+      const nextPage = page + 1;
+      await fetchEntriesByDate(date ?? new Date(), nextPage); // ← nextPage pas page
+      setPage(nextPage);
+    }
+  };
+
+  const loadLess = async () => {
+    if (hasPrev) {
+      // ✅ au lieu de page > 0
+      const nextPage = page - 1;
+      await fetchEntriesByDate(date ?? new Date(), nextPage); // ← nextPage pas page
+      setPage(nextPage);
+    }
+  };
+
   const fetchEntriesByDate = async (selectedDate: Date, pageNumber = 0) => {
     if (!login) return;
     const dateStr = new Date(
@@ -126,6 +147,8 @@ const _ = ({ login }: Props) => {
       console.log(data.entries.length);
       setTotalPages(data.totalPages ?? 0);
       setPage(data.page ?? 0);
+      setHasNext(data.hasNext ?? false); // ← ajoute
+      setHasPrev(data.hasPrev ?? false); // ← ajoute
     } catch (err) {
       console.error("❌ Error fetching entries by date:", err);
     }
@@ -333,6 +356,35 @@ const _ = ({ login }: Props) => {
                 No entry found
               </Text>
             )}
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {hasPrev && (
+                <CIconButton
+                  style={{ alignSelf: "center", marginBottom: 40 }}
+                  icon="chevron-left"
+                  iconColor="#534DB3"
+                  containerColor=""
+                  size={25}
+                  onPress={loadLess}
+                />
+              )}
+              {hasNext && (
+                <CIconButton
+                  style={{ alignSelf: "center", marginBottom: 40 }}
+                  icon="chevron-right"
+                  iconColor="#534DB3"
+                  containerColor=""
+                  size={25}
+                  onPress={loadMore}
+                />
+              )}
+            </View>
           </ScrollView>
           {details && (
             <>
