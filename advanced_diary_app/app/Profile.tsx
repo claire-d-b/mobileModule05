@@ -20,7 +20,8 @@ import CRating from "./CRating";
 import CChip from "./CChip";
 import CModal from "./CModal";
 import CAvatar from "./CAvatar";
-
+import CDialog from "./CDialog";
+import Loading from "./loading";
 const nbOfEntriesPerPage = 6;
 
 const emotions = [
@@ -62,6 +63,20 @@ const Profile = ({ login }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
+  const [visibleDialog, setVisibleDialog] = useState(false);
+  const showDialog = () => setVisibleDialog(true);
+  const hideDialog = () => setVisibleDialog(false);
+
+  const [details, setDetails] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const hideDetails = () => {
+    setSelectedIndex(null);
+    setDetails(false);
+  };
+  const showDetails = () => setDetails(true);
+
+  const [pressed, setPressed] = useState<boolean[]>([false]);
+
   const { localLogin, setLocalLogin } = useAuthContext();
 
   const auth = getAuth();
@@ -81,8 +96,22 @@ const Profile = ({ login }: Props) => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [totalNbOfEntries, setTotalNbOfEntries] = useState(0);
 
+  const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
+  const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
+
   const [message, setMessage] = useState("");
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const containerStyle = {
+    backgroundColor: "white",
+    margin: 20,
+    borderRadius: 10,
+  };
+
+  const formatDate = (timestamp: string) => {
+    return new Date(timestamp).toLocaleDateString("en-CA"); // "2026-05-01"
+  };
   // const auth = getAuth();
   // const email = auth.currentUser?.email ??
   // ;
@@ -154,6 +183,25 @@ const Profile = ({ login }: Props) => {
     }
   };
 
+  const deleteEntry = async (id: number) => {
+    try {
+      const res = await fetch(`${backendUrl}/entries/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error("❌ Failed to delete entry:", data.error);
+        return;
+      }
+      console.log("✅ Entry deleted:", data.entry);
+      fetchCount();
+      fetchEntries(0, login);
+      fetchStats();
+    } catch (err) {
+      console.error("❌ Error deleting entry:", err);
+    }
+  };
+
   const formatDateFR = (date: Date): string => {
     return date.toLocaleDateString("fr-FR", {
       weekday: "short",
@@ -164,15 +212,16 @@ const Profile = ({ login }: Props) => {
   };
 
   const logout = async () => {
+    setIsLoading(true);
     try {
       await getAuth().signOut();
     } catch (_) {}
     await setLocalLogin(null);
-    router.replace("/");
   };
 
   useEffect(() => {
     if (!login) return;
+    if (!localLogin) router.replace("/signin");
 
     fetchCount();
     fetchEntries(0, login);
@@ -314,6 +363,35 @@ const Profile = ({ login }: Props) => {
                     >
                       {e.title}
                     </Text>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}
+                    >
+                      <CIconButton
+                        icon="eye-outline"
+                        iconColor={pressed[i] ? "white" : "#534DB3"}
+                        containerColor="transparent"
+                        size={20}
+                        onPress={() => {
+                          setSelectedIndex(i); // ← add this
+                          showDetails();
+                        }}
+                      />
+                      <CIconButton
+                        icon="trash-can-outline"
+                        iconColor={pressed[i] ? "white" : "#534DB3"}
+                        containerColor="transparent"
+                        size={20}
+                        onPress={() => {
+                          setEntryToDelete(e.id); // ← stocke le bon id
+                          showDialog();
+                        }}
+                      />
+                    </View>
                   </View>
                 );
               })}
@@ -407,6 +485,138 @@ const Profile = ({ login }: Props) => {
           </View>
         </View>
       </View>
+      {details && (
+        <>
+          <Portal>
+            <Modal
+              style={{
+                padding: 0,
+                alignSelf: "center",
+                margin: 0,
+              }}
+              visible={details}
+              onDismiss={hideDetails}
+              contentContainerStyle={containerStyle}
+            >
+              <CIconButton
+                style={{ alignSelf: "flex-end" }}
+                icon="close"
+                iconColor="#534DB3"
+                containerColor=""
+                size={20}
+                onPress={hideDetails}
+              />
+              {
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    width: "100%",
+                    paddingBottom: 10,
+                    paddingLeft: 20,
+                    paddingRight: 20,
+                    // height: "100%",
+                  }}
+                >
+                  <View
+                    style={{
+                      display: "flex",
+                      width: "100%",
+                      flexDirection: "column",
+                      justifyContent: "flex-start",
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <View
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          width: "100%",
+                          justifyContent: "flex-start",
+                          alignItems: "center",
+                        }}
+                      >
+                        <CChip
+                          onPress={() => {}}
+                          label=""
+                          mode="outlined"
+                          icon=""
+                          disabled={true}
+                          textStyle={{ color: "#534DB3" }}
+                          style={{
+                            borderColor: "#534DB3", // ← directement dans style
+                            borderWidth: 1,
+                          }}
+                        >
+                          <Text style={{ color: "#534DB3" }}>
+                            {formatDate(
+                              selectedEntry?.date ??
+                                formatDate(new Date().toLocaleDateString()),
+                            )}
+                          </Text>
+                        </CChip>
+                        <CIconButton
+                          icon={`${
+                            emotions[(selectedEntry?.feeling ?? 1) - 1]
+                          }-outline`}
+                          iconColor="#534DB3"
+                          containerColor=""
+                          size={20}
+                          style={{ alignSelf: "center" }}
+                          onPress={() => {}}
+                          disabled={true}
+                          theme={{
+                            colors: {
+                              onSurfaceDisabled: "#534DB3", // ← couleur de l'icône quand disabled
+                            },
+                          }}
+                        />
+                      </View>
+                      <Text
+                        style={{
+                          color: "#353172",
+                          backgroundColor: "#BBB0D1",
+                          borderRadius: 8,
+                          padding: 8,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {selectedEntry?.title}
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: "#534DB3",
+                          paddingVertical: 20,
+                          alignSelf: "flex-start",
+                        }}
+                      >
+                        {selectedEntry?.content}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              }
+            </Modal>
+          </Portal>
+        </>
+      )}
+      <CDialog
+        visibleDialog={visibleDialog}
+        setVisibleDialog={setVisibleDialog}
+        showDialog={showDialog}
+        hideDialog={hideDialog}
+        deleteEntry={deleteEntry}
+        idx={entryToDelete ?? -1}
+      />
     </View>
   );
 };
