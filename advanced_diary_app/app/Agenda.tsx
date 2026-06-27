@@ -84,8 +84,6 @@ const _ = ({ login }: Props) => {
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
 
-  // const { localLogin } = useAuthContext();
-
   const auth = getAuth();
   const [email, setEmail] = useState<string | null>(login ?? null);
 
@@ -177,17 +175,7 @@ const _ = ({ login }: Props) => {
 
   useEffect(() => {
     fetchEntriesByDate(date ?? new Date(), page);
-    // setDate(date);
-  }, [date]);
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const resolvedEmail = user?.email ?? login ?? null;
-      setEmail(resolvedEmail);
-    });
-    return () => unsubscribe();
-  }, [login]);
+  }, [date, login]);
 
   return (
     <View style={{ width: "100%", flex: 1 }}>

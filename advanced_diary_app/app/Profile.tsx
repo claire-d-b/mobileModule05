@@ -65,28 +65,6 @@ const Profile = ({ login }: Props) => {
   const { localLogin, setLocalLogin } = useAuthContext();
 
   const auth = getAuth();
-  const [email, setEmail] = useState<string | null>(localLogin ?? null);
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const resolvedEmail = user?.email ?? localLogin ?? null;
-      setEmail(resolvedEmail);
-      // ✅ passe resolvedEmail
-      if (resolvedEmail) fetchEntries(0, resolvedEmail);
-    });
-    return () => unsubscribe();
-  }, [login]);
-  // const firebaseEmail = getAuth().currentUser?.email;
-  // const email = firebaseEmail ?? localLogin;
-
-  useEffect(() => {
-    if (!email) return;
-
-    fetchCount();
-    fetchEntries(0);
-    setPage(0);
-  }, [email]);
 
   console.log("authhhh");
   const [title, setTitle] = useState("");
@@ -104,7 +82,6 @@ const Profile = ({ login }: Props) => {
   const [totalNbOfEntries, setTotalNbOfEntries] = useState(0);
 
   const [message, setMessage] = useState("");
-  const [type, setType] = useState("");
 
   // const auth = getAuth();
   // const email = auth.currentUser?.email ??
@@ -115,7 +92,7 @@ const Profile = ({ login }: Props) => {
     pageNumber = 0,
     resolvedEmail?: string | null,
   ) => {
-    const emailToUse = resolvedEmail ?? email;
+    const emailToUse = resolvedEmail;
     if (!emailToUse) return;
 
     try {
@@ -195,18 +172,13 @@ const Profile = ({ login }: Props) => {
   };
 
   useEffect(() => {
-    setType("");
     if (!login) return;
 
     fetchCount();
-    fetchEntries(0);
+    fetchEntries(0, login);
     fetchStats();
     setPage(0);
-  }, []);
-
-  useEffect(() => {
-    fetchStats();
-  }, [entries]);
+  }, [login]);
 
   return (
     <View
@@ -244,7 +216,7 @@ const Profile = ({ login }: Props) => {
             color="white"
             style={{ backgroundColor: "#534DB3" }}
           />
-          <Text style={{ padding: 20, color: "#353172" }}>{email}</Text>
+          <Text style={{ padding: 20, color: "#353172" }}>{login}</Text>
         </View>
         <CIconButton
           mode="outlined"

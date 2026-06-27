@@ -591,7 +591,7 @@ const _ = ({ login }: Props) => {
             color: "#534DB3",
           }}
         >
-          {`Scroll on the right to see next 6 entries. Click below to get newer (<) or older (>) entries.`}
+          {`Scroll on the right to see next 6 entries. Click below to get newer (>) or older (<) entries.`}
         </Text>
       )}
       {isLandscape && (
