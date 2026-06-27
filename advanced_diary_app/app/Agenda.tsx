@@ -7,7 +7,13 @@ import {
   ScrollView,
   useWindowDimensions,
 } from "react-native";
-import { Button, IconButton, PaperProvider } from "react-native-paper";
+import {
+  Button,
+  IconButton,
+  PaperProvider,
+  Modal,
+  Portal,
+} from "react-native-paper";
 import {
   DatePickerModal,
   registerTranslation,
@@ -21,6 +27,7 @@ import CChip from "./CChip";
 import CModal from "./CModal";
 import CTextInput from "./CTextInput";
 import CCalendar from "./CCalendar";
+import CDialog from "./CDialog";
 
 registerTranslation("en", en);
 
@@ -50,6 +57,12 @@ interface Props {
 const _ = ({ login }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+
+  const containerStyle = {
+    backgroundColor: "white",
+    margin: 20,
+    borderRadius: 10,
+  };
 
   const [visibleDialog, setVisibleDialog] = useState(false);
   const showDialog = () => setVisibleDialog(true);
@@ -115,6 +128,23 @@ const _ = ({ login }: Props) => {
       setPage(data.page ?? 0);
     } catch (err) {
       console.error("❌ Error fetching entries by date:", err);
+    }
+  };
+
+  const deleteEntry = async (id: number) => {
+    try {
+      const res = await fetch(`${backendUrl}/entries/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error("❌ Failed to delete entry:", data.error);
+        return;
+      }
+      console.log("✅ Entry deleted:", data.entry);
+      fetchEntriesByDate(date ?? new Date(), page);
+    } catch (err) {
+      console.error("❌ Error deleting entry:", err);
     }
   };
 
@@ -188,7 +218,7 @@ const _ = ({ login }: Props) => {
                       flexDirection: "row",
                       // marginHorizontal: 20,
                       margin: 5,
-                      marginRight: 80,
+                      marginRight: isLandscape ? 80 : 20,
                       // marginHorizontal: 20,
                       padding: 5,
                       justifyContent: "center",
@@ -304,8 +334,140 @@ const _ = ({ login }: Props) => {
               </Text>
             )}
           </ScrollView>
+          {details && (
+            <>
+              <Portal>
+                <Modal
+                  style={{
+                    padding: 0,
+                    alignSelf: "center",
+                    margin: 0,
+                  }}
+                  visible={details}
+                  onDismiss={hideDetails}
+                  contentContainerStyle={containerStyle}
+                >
+                  <CIconButton
+                    style={{ alignSelf: "flex-end" }}
+                    icon="close"
+                    iconColor="#534DB3"
+                    containerColor=""
+                    size={20}
+                    onPress={hideDetails}
+                  />
+                  {
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        width: "100%",
+                        paddingBottom: 10,
+                        paddingLeft: 20,
+                        paddingRight: 20,
+                        // height: "100%",
+                      }}
+                    >
+                      <View
+                        style={{
+                          display: "flex",
+                          width: "100%",
+                          flexDirection: "column",
+                          justifyContent: "flex-start",
+                          alignItems: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center",
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <View
+                            style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              width: "100%",
+                              justifyContent: "flex-start",
+                              alignItems: "center",
+                            }}
+                          >
+                            <CChip
+                              onPress={() => {}}
+                              label=""
+                              mode="outlined"
+                              icon=""
+                              disabled={true}
+                              textStyle={{ color: "#534DB3" }}
+                              style={{
+                                borderColor: "#534DB3", // ← directement dans style
+                                borderWidth: 1,
+                              }}
+                            >
+                              <Text style={{ color: "#534DB3" }}>
+                                {formatDate(
+                                  selectedEntry?.date ??
+                                    formatDate(new Date().toLocaleDateString()),
+                                )}
+                              </Text>
+                            </CChip>
+                            <CIconButton
+                              icon={`${
+                                emotions[(selectedEntry?.feeling ?? 1) - 1]
+                              }-outline`}
+                              iconColor="#534DB3"
+                              containerColor=""
+                              size={20}
+                              style={{ alignSelf: "center" }}
+                              onPress={() => {}}
+                              disabled={true}
+                              theme={{
+                                colors: {
+                                  onSurfaceDisabled: "#534DB3", // ← couleur de l'icône quand disabled
+                                },
+                              }}
+                            />
+                          </View>
+                          <Text
+                            style={{
+                              color: "#353172",
+                              backgroundColor: "#BBB0D1",
+                              borderRadius: 8,
+                              padding: 8,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            {selectedEntry?.title}
+                          </Text>
+
+                          <Text
+                            style={{
+                              color: "#534DB3",
+                              paddingVertical: 20,
+                              alignSelf: "flex-start",
+                            }}
+                          >
+                            {selectedEntry?.content}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  }
+                </Modal>
+              </Portal>
+            </>
+          )}
         </View>
       </View>
+      <CDialog
+        visibleDialog={visibleDialog}
+        setVisibleDialog={setVisibleDialog}
+        showDialog={showDialog}
+        hideDialog={hideDialog}
+        deleteEntry={deleteEntry}
+        idx={entryToDelete ?? -1}
+      />
     </View>
   );
 };
