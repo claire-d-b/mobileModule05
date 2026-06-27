@@ -24,7 +24,7 @@ import CCalendar from "./CCalendar";
 
 registerTranslation("en", en);
 
-const backendUrl = "http://192.168.1.39:3000";
+const backendUrl = "http://192.168.1.192:3000";
 
 const emotions = [
   "emoticon",
@@ -131,13 +131,14 @@ const _ = ({ login }: Props) => {
           flexDirection: isLandscape ? "row" : "column", // ← côte à côte en landscape
           justifyContent: "flex-start",
           alignItems: "center",
-          padding: 10,
+          // padding: 10,
         }}
       >
         <View
           style={{
-            width: 350,
-            height: 300,
+            width: 275,
+            height: 275,
+            // padding: 5,
             overflow: "hidden",
             borderRadius: 10,
           }}

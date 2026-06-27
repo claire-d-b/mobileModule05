@@ -14,7 +14,7 @@ const _ = ({ page, date, setDate }: Props) => {
     <Calendar
       firstDay={1}
       style={{
-        width: 350,
+        width: 275,
       }}
       theme={{
         backgroundColor: "#ffffff",

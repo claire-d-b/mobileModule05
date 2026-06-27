@@ -9,13 +9,13 @@ export default function Index() {
   const { localLogin, loading } = useAuthContext();
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView
-        style={{ flex: 1 }}
-        edges={["top", "bottom", "left", "right"]}
-      >
-        {loading ? <Loading /> : localLogin ? <Home /> : <Signin />}
-      </SafeAreaView>
-    </SafeAreaProvider>
+    // <SafeAreaProvider>
+    //   <SafeAreaView
+    //     style={{ flex: 1 }}
+    //     edges={["top", "bottom", "left", "right"]}
+    //   >
+    loading ? <Loading /> : localLogin ? <Home /> : <Signin />
+    //   </SafeAreaView>
+    // </SafeAreaProvider>
   );
 }

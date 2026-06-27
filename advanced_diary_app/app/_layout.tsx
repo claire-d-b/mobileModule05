@@ -6,6 +6,7 @@ import auth from "../config/firebase";
 import { AuthProvider, useAuthContext } from "../context/AuthContext";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { PaperProvider, MD3LightTheme } from "react-native-paper";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,9 +21,16 @@ const RootLayoutNav = () => {
 const _ = () => {
   return (
     <AuthProvider>
-      <PaperProvider theme={MD3LightTheme}>
-        <RootLayoutNav />
-      </PaperProvider>
+      <SafeAreaProvider>
+        <SafeAreaView
+          style={{ flex: 1 }}
+          edges={["top", "bottom", "left", "right"]}
+        >
+          <PaperProvider theme={MD3LightTheme}>
+            <RootLayoutNav />
+          </PaperProvider>
+        </SafeAreaView>
+      </SafeAreaProvider>
     </AuthProvider>
   );
 };
