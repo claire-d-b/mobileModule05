@@ -217,7 +217,7 @@ const _ = ({ login }: Props) => {
             flex: 1,
           }}
         >
-          {(entries && isLandscape && entries.length >= 4 && (
+          {entries && entries.length >= 4 && (
             <Text
               style={{
                 color: "#534DB3",
@@ -226,19 +226,9 @@ const _ = ({ login }: Props) => {
                 marginTop: 40,
               }}
             >
-              Scroll down to see next entries.
+              {`Scroll down and click below to get other entries (<)/(>).`}
             </Text>
-          )) ||
-            (entries && !isLandscape && entries.length >= 4 && (
-              <Text
-                style={{
-                  color: "#534DB3",
-                  alignSelf: "center",
-                  marginHorizontal: 20,
-                  marginTop: 40,
-                }}
-              >{`Scroll down and click below to get newer (<) or older (>) entries.`}</Text>
-            ))}
+          )}
           <ScrollView style={{ flex: 1 }}>
             {(entries &&
               entries.length > 0 &&

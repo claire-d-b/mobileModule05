@@ -76,7 +76,7 @@ const Profile = ({ login }: Props) => {
       if (resolvedEmail) fetchEntries(0, resolvedEmail);
     });
     return () => unsubscribe();
-  }, [localLogin]);
+  }, [login]);
   // const firebaseEmail = getAuth().currentUser?.email;
   // const email = firebaseEmail ?? localLogin;
 
