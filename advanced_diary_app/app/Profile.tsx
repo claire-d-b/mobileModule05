@@ -22,7 +22,7 @@ import CModal from "./CModal";
 import CAvatar from "./CAvatar";
 import CDialog from "./CDialog";
 import Loading from "./loading";
-import { formatDate, formatDateEN } from "../utils/utils";
+import { formatDate } from "../utils/utils";
 
 const emotions = [
   "emoticon",
@@ -319,7 +319,7 @@ const Profile = ({ login }: Props) => {
                         icon=""
                         disabled={true}
                       >
-                        {formatDateEN(new Date(e.date))}
+                        {formatDate(new Date(e.date))}
                       </CChip>
                     </View>
                     <CIconButton
@@ -541,8 +541,9 @@ const Profile = ({ login }: Props) => {
                         >
                           <Text style={{ color: "#534DB3" }}>
                             {formatDate(
-                              selectedEntry?.date ??
-                                formatDate(new Date().toLocaleDateString()),
+                              selectedEntry?.date
+                                ? new Date(selectedEntry.date) // ← convertis en Date
+                                : new Date(),
                             )}
                           </Text>
                         </CChip>

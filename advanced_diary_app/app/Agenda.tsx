@@ -5,7 +5,7 @@ import CIconButton from "./CIconButton";
 import CChip from "./CChip";
 import CCalendar from "./CCalendar";
 import CDialog from "./CDialog";
-import { formatDate, formatDateEN } from "../utils/utils";
+import { formatDate } from "../utils/utils";
 
 const backendUrl = "http://192.168.1.12:3000";
 
@@ -224,7 +224,7 @@ const _ = ({ login }: Props) => {
                               icon=""
                               disabled={true}
                             >
-                              <Text>{formatDateEN(new Date(e.date))}</Text>
+                              <Text>{formatDate(new Date(e.date))}</Text>
                             </CChip>
                           </View>
                           <CIconButton
@@ -392,8 +392,9 @@ const _ = ({ login }: Props) => {
                             >
                               <Text style={{ color: "#534DB3" }}>
                                 {formatDate(
-                                  selectedEntry?.date ??
-                                    formatDate(new Date().toLocaleDateString()),
+                                  selectedEntry?.date
+                                    ? new Date(selectedEntry.date) // ← convertis en Date
+                                    : new Date(),
                                 )}
                               </Text>
                             </CChip>

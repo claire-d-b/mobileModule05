@@ -19,7 +19,7 @@ import CChip from "./CChip";
 import CModal from "./CModal";
 import CAvatar from "./CAvatar";
 import CDialog from "./CDialog";
-import { formatDate, formatDateEN } from "../utils/utils";
+import { formatDate } from "../utils/utils";
 import type { MD3Colors } from "react-native-paper";
 import CButton from "./CButton";
 import { Background } from "@react-navigation/elements";
@@ -389,7 +389,7 @@ const _ = ({ login }: Props) => {
                     disabled={true}
                   >
                     <Text style={{ color: "#534DB3" }}>
-                      {formatDateEN(new Date(e.date))}
+                      {formatDate(new Date(e.date))}
                     </Text>
                   </CChip>
                 </View>
@@ -521,8 +521,9 @@ const _ = ({ login }: Props) => {
                           >
                             <Text style={{ color: "#534DB3" }}>
                               {formatDate(
-                                selectedEntry?.date ??
-                                  formatDate(new Date().toLocaleDateString()),
+                                selectedEntry?.date
+                                  ? new Date(selectedEntry.date) // ← convertis en Date
+                                  : new Date(),
                               )}
                             </Text>
                           </CChip>
