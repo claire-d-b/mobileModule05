@@ -4,10 +4,11 @@ import { Modal, Portal } from "react-native-paper";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";
 import CCalendar from "./CCalendar";
-import CDialog from "./CDialog";
+import CDelete from "./CDelete";
+import CEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
 
-const backendUrl = "http://192.168.1.12:3000";
+const backendUrl = "http://192.168.1.39:3000";
 
 const emotions = [
   "emoticon",
@@ -96,12 +97,11 @@ const _ = ({ login }: Props) => {
       if (!res.ok) return;
 
       setEntries(data.entries ?? []);
-      // console.log(data.entries.length);
       setPage(data.page ?? 0);
       setHasNext(data.hasNext ?? false);
       setHasPrev(data.hasPrev ?? false);
     } catch (err) {
-      console.error("❌ Error fetching entries by date:", err);
+      console.error("Error fetching entries by date:", err);
     }
   };
 
@@ -112,13 +112,13 @@ const _ = ({ login }: Props) => {
       });
       const data = await res.json();
       if (!res.ok) {
-        console.error("❌ Failed to delete entry:", data.error);
+        console.error("Failed to delete entry:", data.error);
         return;
       }
-      console.log("✅ Entry deleted:", data.entry);
+      console.log("Entry deleted:", data.entry);
       fetchEntriesByDate(date ?? new Date(), page);
     } catch (err) {
-      console.error("❌ Error deleting entry:", err);
+      console.error("Error deleting entry:", err);
     }
   };
 
@@ -321,132 +321,17 @@ const _ = ({ login }: Props) => {
             </View>
           </ScrollView>
           {details && (
-            <>
-              <Portal>
-                <Modal
-                  style={{
-                    padding: 0,
-                    alignSelf: "center",
-                    margin: 0,
-                  }}
-                  visible={details}
-                  onDismiss={hideDetails}
-                  contentContainerStyle={containerStyle}
-                >
-                  <CIconButton
-                    style={{ alignSelf: "flex-end" }}
-                    icon="close"
-                    iconColor="#534DB3"
-                    containerColor=""
-                    size={20}
-                    onPress={hideDetails}
-                  />
-                  {
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        width: "100%",
-                        paddingBottom: 10,
-                        paddingLeft: 20,
-                        paddingRight: 20,
-                      }}
-                    >
-                      <View
-                        style={{
-                          display: "flex",
-                          width: "100%",
-                          flexDirection: "column",
-                          justifyContent: "flex-start",
-                          alignItems: "center",
-                        }}
-                      >
-                        <View
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "flex-start",
-                          }}
-                        >
-                          <View
-                            style={{
-                              display: "flex",
-                              flexDirection: "row",
-                              width: "100%",
-                              justifyContent: "flex-start",
-                              alignItems: "center",
-                            }}
-                          >
-                            <CChip
-                              onPress={() => {}}
-                              label=""
-                              mode="outlined"
-                              icon=""
-                              disabled={true}
-                              textStyle={{ color: "#534DB3" }}
-                              style={{
-                                borderColor: "#534DB3", // ← directement dans style
-                                borderWidth: 1,
-                              }}
-                            >
-                              <Text style={{ color: "#534DB3" }}>
-                                {formatDate(
-                                  selectedEntry?.date
-                                    ? new Date(selectedEntry.date) // ← convertis en Date
-                                    : new Date(),
-                                )}
-                              </Text>
-                            </CChip>
-                            <CIconButton
-                              icon={`${
-                                emotions[(selectedEntry?.feeling ?? 1) - 1]
-                              }-outline`}
-                              iconColor="#534DB3"
-                              containerColor=""
-                              size={20}
-                              style={{ alignSelf: "center" }}
-                              onPress={() => {}}
-                              disabled={true}
-                              theme={{
-                                colors: {
-                                  onSurfaceDisabled: "#534DB3", // ← couleur de l'icône quand disabled
-                                },
-                              }}
-                            />
-                          </View>
-                          <Text
-                            style={{
-                              color: "#353172",
-                              backgroundColor: "#BBB0D1",
-                              borderRadius: 8,
-                              padding: 8,
-                              flexWrap: "wrap",
-                            }}
-                          >
-                            {selectedEntry?.title}
-                          </Text>
-
-                          <Text
-                            style={{
-                              color: "#534DB3",
-                              paddingVertical: 20,
-                              alignSelf: "flex-start",
-                            }}
-                          >
-                            {selectedEntry?.content}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  }
-                </Modal>
-              </Portal>
-            </>
+            <CEntry
+              emotions={emotions}
+              containerStyle={containerStyle}
+              details={details}
+              hideDetails={hideDetails}
+              selectedEntry={selectedEntry}
+            />
           )}
         </View>
       </View>
-      <CDialog
+      <CDelete
         visibleDialog={visibleDialog}
         setVisibleDialog={setVisibleDialog}
         showDialog={showDialog}

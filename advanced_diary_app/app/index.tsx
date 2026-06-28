@@ -8,14 +8,5 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
   const { localLogin, loading } = useAuthContext();
 
-  return (
-    // <SafeAreaProvider>
-    //   <SafeAreaView
-    //     style={{ flex: 1 }}
-    //     edges={["top", "bottom", "left", "right"]}
-    //   >
-    loading ? <Loading /> : localLogin ? <Home /> : <Signin />
-    //   </SafeAreaView>
-    // </SafeAreaProvider>
-  );
+  return loading ? <Loading /> : localLogin ? <Home /> : <Signin />;
 }

@@ -10,7 +10,7 @@ import CTextInput from "./CTextInput";
 import CIconButton from "./CIconButton";
 import CRating from "./CRating";
 import CChip from "./CChip";
-import CModal from "./CModal";
+import CModal from "./CAddEntry";
 import CAvatar from "./CAvatar";
 import CBottomNav from "./CBottomNav";
 import type { MD3Colors } from "react-native-paper";
