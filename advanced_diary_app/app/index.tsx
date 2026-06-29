@@ -3,8 +3,10 @@ import Home from "./home";
 import Loading from "./loading";
 import { useAuthContext } from "../context/AuthContext";
 
-export default function Index() {
+const _ = () => {
   const { localLogin, loading } = useAuthContext();
 
   return loading ? <Loading /> : localLogin ? <Home /> : <Signin />;
-}
+};
+
+export default _;

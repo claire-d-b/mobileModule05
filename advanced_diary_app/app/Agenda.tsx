@@ -145,7 +145,7 @@ const _ = ({ login }: Props) => {
             borderRadius: 10,
           }}
         >
-          <CCalendar page={page} date={date ?? new Date()} setDate={setDate} />
+          <CCalendar date={date ?? new Date()} setDate={setDate} />
         </View>
         <View
           style={{
@@ -332,8 +332,6 @@ const _ = ({ login }: Props) => {
       </View>
       <CDelete
         visibleDialog={visibleDialog}
-        setVisibleDialog={setVisibleDialog}
-        showDialog={showDialog}
         hideDialog={hideDialog}
         deleteEntry={deleteEntry}
         idx={entryToDelete ?? -1}

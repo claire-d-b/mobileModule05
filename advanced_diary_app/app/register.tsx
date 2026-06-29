@@ -14,7 +14,7 @@ interface Information {
 
 const backendUrl = "http://192.168.1.39:3000";
 
-const Register = () => {
+const _ = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [npassword, setNPassword] = useState("");
@@ -209,4 +209,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default _;

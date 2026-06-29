@@ -15,7 +15,7 @@ interface Props {
   theme?: {};
 }
 
-const CIconButton = ({
+const _ = ({
   style,
   mode,
   icon,
@@ -39,4 +39,4 @@ const CIconButton = ({
   />
 );
 
-export default CIconButton;
+export default _;

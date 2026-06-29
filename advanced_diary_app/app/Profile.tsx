@@ -46,7 +46,7 @@ interface Props {
 const successColor = "#25783F";
 const errorColor = "#A12237";
 
-const Profile = ({ login }: Props) => {
+const _ = ({ login }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
@@ -316,7 +316,7 @@ const Profile = ({ login }: Props) => {
                       onPress={() => {}}
                       theme={{
                         colors: {
-                          onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
+                          onSurfaceDisabled: "white",
                         },
                       }}
                       disabled={true}
@@ -346,7 +346,7 @@ const Profile = ({ login }: Props) => {
                         containerColor="transparent"
                         size={20}
                         onPress={() => {
-                          setSelectedIndex(i); // ← add this
+                          setSelectedIndex(i);
                           showDetails();
                         }}
                       />
@@ -356,7 +356,7 @@ const Profile = ({ login }: Props) => {
                         containerColor="transparent"
                         size={20}
                         onPress={() => {
-                          setEntryToDelete(e.id); // ← stocke le bon id
+                          setEntryToDelete(e.id);
                           showDialog();
                         }}
                       />
@@ -400,7 +400,7 @@ const Profile = ({ login }: Props) => {
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "flex-start",
-                    width: "100%", // ← pas de flex: 1 ici
+                    width: "100%",
                   }}
                 >
                   {(isLandscape && (
@@ -465,8 +465,6 @@ const Profile = ({ login }: Props) => {
       )}
       <CDelete
         visibleDialog={visibleDialog}
-        setVisibleDialog={setVisibleDialog}
-        showDialog={showDialog}
         hideDialog={hideDialog}
         deleteEntry={deleteEntry}
         idx={entryToDelete ?? -1}
@@ -475,4 +473,4 @@ const Profile = ({ login }: Props) => {
   );
 };
 
-export default Profile;
+export default _;

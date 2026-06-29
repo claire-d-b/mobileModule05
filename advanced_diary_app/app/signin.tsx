@@ -18,7 +18,7 @@ interface Information {
 
 const backendUrl = "http://192.168.1.39:3000";
 
-const SignIn = () => {
+const _ = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -30,9 +30,8 @@ const SignIn = () => {
   const { setLocalLogin } = useAuthContext(); // ← ajoute ça
   const handleSubmit = async ({ login, password }: Information) => {
     setError("");
-    setIsLoading(true); // ← affiche loading
+    setIsLoading(true);
     try {
-      // 1. Appel backend
       const res = await fetch(`${backendUrl}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,7 +42,7 @@ const SignIn = () => {
       if (!res.ok) {
         setError(data.error || "Login failed");
         console.error("❌ Login failed:", data.error);
-        setIsLoading(false); // ← cache loading si erreur
+        setIsLoading(false);
         return;
       }
 
@@ -65,7 +64,7 @@ const SignIn = () => {
     } catch (err) {
       console.error("❌ Error during login:", err);
       setError("An error occurred");
-      setIsLoading(false); // ← cache loading si erreur
+      setIsLoading(false);
     }
   };
   if (isLoading) return <Loading />;
@@ -197,4 +196,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default _;

@@ -24,7 +24,7 @@ interface Props {
   setContent: React.Dispatch<React.SetStateAction<string>>;
   handleSubmit: () => {};
 }
-const CModal = ({
+const _ = ({
   isLandscape,
   type,
   message,
@@ -192,4 +192,4 @@ const CModal = ({
   );
 };
 
-export default CModal;
+export default _;

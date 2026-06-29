@@ -5,21 +5,12 @@ import CIconButton from "./CIconButton";
 
 interface Props {
   visibleDialog: boolean;
-  setVisibleDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  showDialog: () => void;
   hideDialog: () => void;
   deleteEntry: (idx: number) => Promise<void>;
   idx: number;
 }
 
-const _ = ({
-  visibleDialog,
-  setVisibleDialog,
-  showDialog,
-  hideDialog,
-  deleteEntry,
-  idx,
-}: Props) => {
+const _ = ({ visibleDialog, hideDialog, deleteEntry, idx }: Props) => {
   return (
     visibleDialog && (
       <View>

@@ -1,5 +1,7 @@
 import Home from "./home";
 
-export default function OAuthRedirect() {
+const _ = () => {
   return <Home />;
-}
+};
+
+export default _;

@@ -1,13 +1,11 @@
 import { Calendar } from "react-native-calendars";
 
 interface Props {
-  page: number;
   date: Date;
   setDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }
 
-// Remplace le Button + DatePickerModal par :
-const _ = ({ page, date, setDate }: Props) => {
+const _ = ({ date, setDate }: Props) => {
   return (
     <Calendar
       firstDay={1}
@@ -30,7 +28,6 @@ const _ = ({ page, date, setDate }: Props) => {
       onDayPress={(day) => {
         const selected = new Date(day.dateString);
         setDate(selected);
-        // fetchEntriesByDate(selected);
       }}
     />
   );

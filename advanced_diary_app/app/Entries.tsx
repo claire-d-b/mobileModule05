@@ -468,8 +468,6 @@ const _ = ({ login }: Props) => {
       ></View>
       <CDelete
         visibleDialog={visibleDialog}
-        setVisibleDialog={setVisibleDialog}
-        showDialog={showDialog}
         hideDialog={hideDialog}
         deleteEntry={deleteEntry}
         idx={entryToDelete ?? -1}

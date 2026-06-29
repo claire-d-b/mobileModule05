@@ -23,7 +23,7 @@ interface Props {
   multiline: boolean | undefined;
 }
 
-export default function CTextInput({
+const _ = ({
   secureTextEntry,
   right,
   onBlur,
@@ -43,7 +43,7 @@ export default function CTextInput({
   style,
   disabled,
   multiline,
-}: Props) {
+}: Props) => {
   return (
     <TextInput
       secureTextEntry={secureTextEntry}
@@ -66,4 +66,6 @@ export default function CTextInput({
       multiline={multiline}
     />
   );
-}
+};
+
+export default _;
