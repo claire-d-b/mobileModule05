@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, useWindowDimensions } from "react-native";
-import { Modal, Portal } from "react-native-paper";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";
 import CCalendar from "./CCalendar";
 import CDelete from "./CDelete";
-import CEntry from "./CViewEntry";
+import CViewEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
 
 const backendUrl = "http://192.168.1.39:3000";
@@ -321,7 +320,7 @@ const _ = ({ login }: Props) => {
             </View>
           </ScrollView>
           {details && (
-            <CEntry
+            <CViewEntry
               emotions={emotions}
               containerStyle={containerStyle}
               details={details}

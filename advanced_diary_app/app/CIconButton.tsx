@@ -1,8 +1,7 @@
-import * as React from 'react';
-import { IconButton, MD3Colors } from 'react-native-paper';
-import { GestureResponderEvent } from "react-native"
+import * as React from "react";
+import { IconButton } from "react-native-paper";
+import { GestureResponderEvent } from "react-native";
 import { StyleProp, ViewStyle } from "react-native";
-
 
 interface Props {
   style?: StyleProp<ViewStyle>;
@@ -16,7 +15,17 @@ interface Props {
   theme?: {};
 }
 
-const CIconButton = ({ style, mode, icon, iconColor, containerColor,  size, onPress, disabled, theme }: Props) => (
+const CIconButton = ({
+  style,
+  mode,
+  icon,
+  iconColor,
+  containerColor,
+  size,
+  onPress,
+  disabled,
+  theme,
+}: Props) => (
   <IconButton
     style={style}
     mode={mode}

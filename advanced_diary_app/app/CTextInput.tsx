@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { Button, TextInput } from "react-native-paper";
-import { GestureResponderEvent } from "react-native";
+import React from "react";
+import { TextInput } from "react-native-paper";
 
 interface Props {
   secureTextEntry: boolean | undefined;
@@ -43,7 +42,7 @@ export default function CTextInput({
   contentStyle,
   style,
   disabled,
-  multiline
+  multiline,
 }: Props) {
   return (
     <TextInput

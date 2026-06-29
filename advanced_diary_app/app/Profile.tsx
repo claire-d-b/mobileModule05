@@ -1,28 +1,14 @@
-import { useRouter } from "expo-router";
-import { useNavigation } from "expo-router";
-import { View, Platform, useWindowDimensions } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import {
-  Modal,
-  Portal,
-  Text,
-  Button,
-  PaperProvider,
-  IconButton,
-} from "react-native-paper";
+import { Text } from "react-native-paper";
 import { router } from "expo-router";
-import CTextInput from "./CTextInput";
 import CIconButton from "./CIconButton";
-import CRating from "./CRating";
 import CChip from "./CChip";
-import CModal from "./CAddEntry";
 import CAvatar from "./CAvatar";
 import CDelete from "./CDelete";
-import CEntry from "./CViewEntry";
-import Loading from "./loading";
+import CViewEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
 
 const emotions = [
@@ -82,7 +68,6 @@ const Profile = ({ login }: Props) => {
 
   const auth = getAuth();
 
-  console.log("authhhh");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [feeling, setFeeling] = useState(3);
@@ -470,7 +455,7 @@ const Profile = ({ login }: Props) => {
         </View>
       </View>
       {details && (
-        <CEntry
+        <CViewEntry
           emotions={emotions}
           containerStyle={containerStyle}
           details={details}

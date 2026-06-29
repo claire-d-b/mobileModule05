@@ -1,10 +1,7 @@
 import React, { useState } from "react";
-import { View, Platform, Text } from "react-native";
+import { View, Text } from "react-native";
 import { TextInput } from "react-native-paper";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { router } from "expo-router";
-import auth from "../config/firebase";
 import { useAuthContext } from "../context/AuthContext";
 import CTextInput from "./CTextInput";
 import CButton from "./CButton";

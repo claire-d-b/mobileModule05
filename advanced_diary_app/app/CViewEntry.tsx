@@ -1,28 +1,8 @@
-import { useRouter } from "expo-router";
-import { useNavigation } from "expo-router";
-import {
-  View,
-  Platform,
-  Pressable,
-  useWindowDimensions,
-  ScrollView,
-} from "react-native";
-import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useAuthContext } from "../context/AuthContext";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { Modal, Portal, Text, Button, PaperProvider } from "react-native-paper";
-import CTextInput from "./CTextInput";
+import { View } from "react-native";
+import { Modal, Portal, Text } from "react-native-paper";
 import CIconButton from "./CIconButton";
-import CRating from "./CRating";
 import CChip from "./CChip";
-import CModal from "./CAddEntry";
-import CAvatar from "./CAvatar";
-import CDelete from "./CDelete";
 import { formatDate } from "../utils/utils";
-import type { MD3Colors } from "react-native-paper";
-import CButton from "./CButton";
-import { Background } from "@react-navigation/elements";
 
 interface Entry {
   id: number;

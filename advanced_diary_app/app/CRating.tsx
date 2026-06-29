@@ -1,14 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import {
-  Avatar,
-  IconButton,
-  PaperProvider,
-  Checkbox,
-} from "react-native-paper";
-import { Chip, RadioButton, List, Icon } from "react-native-paper";
-import { TextInput, Button, Text } from "react-native-paper";
+import { IconButton } from "react-native-paper";
+import { Text } from "react-native-paper";
 
 interface Props {
   setRating: React.Dispatch<React.SetStateAction<number>>;

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { View, Platform } from "react-native";
+import { View } from "react-native";
 import { TextInput } from "react-native-paper";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
 import { router } from "expo-router";

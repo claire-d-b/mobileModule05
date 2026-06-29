@@ -1,9 +1,6 @@
 import * as React from "react";
 import type { ReactNode, Dispatch, SetStateAction } from "react";
-import { BottomNavigation, Text } from "react-native-paper";
-import { useAuthContext } from "../context/AuthContext";
-import Profile from "./Profile";
-import Agenda from "./Agenda";
+import { BottomNavigation } from "react-native-paper";
 
 // Définis le type manuellement
 type Route = {

@@ -1,29 +1,14 @@
-import { useRouter } from "expo-router";
-import { useNavigation } from "expo-router";
-import {
-  View,
-  Platform,
-  Pressable,
-  useWindowDimensions,
-  ScrollView,
-} from "react-native";
+import { View, useWindowDimensions, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useAuthContext } from "../context/AuthContext";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { Modal, Portal, Text, Button, PaperProvider } from "react-native-paper";
-import CTextInput from "./CTextInput";
+import { getAuth } from "firebase/auth";
+import { Text } from "react-native-paper";
 import CIconButton from "./CIconButton";
-import CRating from "./CRating";
 import CChip from "./CChip";
 import CAddEntry from "./CAddEntry";
-import CAvatar from "./CAvatar";
 import CDelete from "./CDelete";
-import CEntry from "./CViewEntry";
+import CViewEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
-import type { MD3Colors } from "react-native-paper";
 import CButton from "./CButton";
-import { Background } from "@react-navigation/elements";
 
 const emotions = [
   "emoticon",
@@ -391,7 +376,7 @@ const _ = ({ login }: Props) => {
             );
           })}
         {details && (
-          <CEntry
+          <CViewEntry
             emotions={emotions}
             containerStyle={containerStyle}
             details={details}

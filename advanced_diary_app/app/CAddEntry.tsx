@@ -1,19 +1,9 @@
 import * as React from "react";
-import {
-  Modal,
-  Portal,
-  Text,
-  Button,
-  PaperProvider,
-  IconButton,
-  TextInput,
-} from "react-native-paper";
+import { Modal, Portal, Text } from "react-native-paper";
 import { StyleProp, ViewStyle, View } from "react-native";
-import CButton from "./CButton";
 import CIconButton from "./CIconButton";
 import CTextInput from "./CTextInput";
 import CRating from "./CRating";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const errorColor = "#A60838";
 const successColor = "#085E24";

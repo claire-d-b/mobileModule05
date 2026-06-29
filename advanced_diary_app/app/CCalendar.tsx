@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { Calendar } from "react-native-calendars";
-import { Dimensions, useWindowDimensions } from "react-native";
 
 interface Props {
   page: number;
