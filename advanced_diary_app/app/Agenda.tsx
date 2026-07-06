@@ -123,7 +123,7 @@ const _ = ({ login }: Props) => {
 
   useEffect(() => {
     fetchEntriesByDate(date ?? new Date(), page);
-  }, [date, login]);
+  }, [date]);
 
   return (
     <View style={{ width: "100%", flex: 1 }}>
@@ -134,7 +134,6 @@ const _ = ({ login }: Props) => {
           flexDirection: isLandscape ? "row" : "column", // ← côte à côte en landscape
           justifyContent: "flex-start",
           alignItems: "center",
-          // padding: 10,
         }}
       >
         <View

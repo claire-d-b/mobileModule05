@@ -131,7 +131,7 @@ const _ = ({ login }: Props) => {
       const data = await res.json();
       console.log("📊 stats:", data);
       setStats(data.stats ?? {});
-      console.log("stats", stats);
+      console.log("stats", data.stats);
     } catch (err) {
       console.error("❌ fetchStats:", err);
     }
@@ -196,7 +196,7 @@ const _ = ({ login }: Props) => {
     fetchEntries(0, login);
     fetchStats();
     setPage(0);
-  }, [login]);
+  }, []);
 
   return (
     <View

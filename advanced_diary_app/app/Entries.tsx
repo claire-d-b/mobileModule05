@@ -206,7 +206,7 @@ const _ = ({ login }: Props) => {
   useEffect(() => {
     fetchEntries(page);
     setPage(0);
-  }, [login]);
+  }, []);
 
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
@@ -267,7 +267,6 @@ const _ = ({ login }: Props) => {
           width: "100%",
           flex: 1,
           padding: 10,
-          // flexGrow: 0,
         }}
         contentContainerStyle={{
           flexDirection: isLandscape ? "row" : "column",
