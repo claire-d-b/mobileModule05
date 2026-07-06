@@ -39,6 +39,7 @@ const _ = ({
             padding: 0,
             alignSelf: "center",
             margin: 0,
+            marginBottom: 20,
           }}
           visible={details}
           onDismiss={hideDetails}
