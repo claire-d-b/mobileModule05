@@ -341,7 +341,7 @@ const _ = ({ login }: Props) => {
                       }}
                     >
                       <CIconButton
-                        icon="eye-outline"
+                        icon="magnify"
                         iconColor={pressed[i] ? "white" : "#534DB3"}
                         containerColor="transparent"
                         size={20}
