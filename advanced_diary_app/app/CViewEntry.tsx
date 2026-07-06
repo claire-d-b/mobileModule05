@@ -1,8 +1,9 @@
-import { View } from "react-native";
+import { View, useWindowDimensions, ScrollView } from "react-native";
 import { Modal, Portal, Text } from "react-native-paper";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";
 import { formatDate } from "../utils/utils";
+import { getEllipsis } from "./Entries";
 
 interface Entry {
   id: number;
@@ -28,6 +29,8 @@ const _ = ({
   hideDetails,
   selectedEntry,
 }: Props) => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
   return (
     <View>
       <Portal>
@@ -50,7 +53,7 @@ const _ = ({
             onPress={hideDetails}
           />
           {
-            <View
+            <ScrollView
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -128,7 +131,7 @@ const _ = ({
                       color: "#353172",
                       backgroundColor: "#BBB0D1",
                       borderRadius: 8,
-                      padding: 8,
+                      padding: 20,
                       flexWrap: "wrap",
                     }}
                   >
@@ -138,7 +141,7 @@ const _ = ({
                   <Text
                     style={{
                       color: "#534DB3",
-                      paddingVertical: 20,
+                      padding: 10,
                       alignSelf: "flex-start",
                     }}
                   >
@@ -146,7 +149,7 @@ const _ = ({
                   </Text>
                 </View>
               </View>
-            </View>
+            </ScrollView>
           }
         </Modal>
       </Portal>
