@@ -251,7 +251,10 @@ const _ = ({ login }: Props) => {
         visible={visible}
         hideModal={hideModal}
         showModal={showModal}
-        style={{ width: "100%", height: "100%" }}
+        style={{
+          width: "100%",
+          height: isLandscape ? "80%" : "100%",
+        }}
         title={title}
         setTitle={setTitle}
         setFeeling={setFeeling}

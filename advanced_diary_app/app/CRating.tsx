@@ -4,6 +4,7 @@ import { IconButton } from "react-native-paper";
 import { Text } from "react-native-paper";
 
 interface Props {
+  isLandscape: boolean;
   setRating: React.Dispatch<React.SetStateAction<number>>;
   color: string;
   focusColor: string;
@@ -18,7 +19,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const _ = ({ setRating, color, focusColor }: Props) => {
+const _ = ({ isLandscape, setRating, color, focusColor }: Props) => {
   const [checked, setChecked] = React.useState("rate_2");
 
   return (
@@ -26,13 +27,15 @@ const _ = ({ setRating, color, focusColor }: Props) => {
       <View
         style={{
           display: "flex",
+          flexDirection: isLandscape ? "row" : "column",
+          alignItems: "center",
           backgroundColor: color,
           alignSelf: "stretch",
           borderRadius: 10,
           marginTop: 5,
         }}
       >
-        <Text style={{ color: "white", padding: 10 }}>Humeur du jour</Text>
+        <Text style={{ color: "white", padding: 20 }}>Humeur du jour</Text>
         <View
           style={{
             display: "flex",

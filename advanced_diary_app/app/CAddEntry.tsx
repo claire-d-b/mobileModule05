@@ -41,8 +41,8 @@ const _ = ({
 }: Props) => {
   const containerStyle = {
     backgroundColor: "white",
-    padding: isLandscape ? 0 : 20,
-    margin: isLandscape ? 0 : 10,
+    padding: 20,
+    margin: 10,
     borderRadius: 10,
   };
 
@@ -90,6 +90,7 @@ const _ = ({
           </View>
           <View style={{ display: "flex", width: "100%" }}>
             <CRating
+              isLandscape={isLandscape}
               setRating={setFeeling}
               color="#BBB0D1"
               focusColor="#534DB3"
@@ -136,14 +137,34 @@ const _ = ({
                 multiline={true}
               />
             </View>
-            <View style={{ alignSelf: "flex-end", marginRight: 20 }}>
-              <CIconButton
-                icon="plus"
-                iconColor="white"
-                containerColor="#534DB3"
-                size={20}
-                onPress={handleSubmit}
-              />
+            <View
+              style={{
+                display: "flex",
+                width: "100%",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingVertical: 10,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#353172",
+                  flex: 1,
+                  flexShrink: 1,
+                }}
+              >
+                Add a diary entry or click outside this area to dismiss.
+              </Text>
+              <View style={{ alignSelf: "flex-end", marginRight: 10 }}>
+                <CIconButton
+                  icon="plus"
+                  iconColor="white"
+                  containerColor="#534DB3"
+                  size={20}
+                  onPress={handleSubmit}
+                />
+              </View>
             </View>
           </View>
           <View
@@ -183,9 +204,6 @@ const _ = ({
                 </>
               )) || <></>}
           </View>
-          <Text style={{ color: "#353172" }}>
-            Add a diary entry or click outside this area to dismiss.
-          </Text>
         </Modal>
       </Portal>
     </View>
