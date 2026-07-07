@@ -18,7 +18,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "http://192.168.1.15:3000";
 
 interface Entry {
   id: number;
@@ -228,7 +228,7 @@ const _ = ({ login }: Props) => {
         style={{
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: "center",
           paddingHorizontal: 10,
         }}
       >
@@ -252,8 +252,7 @@ const _ = ({ login }: Props) => {
         hideModal={hideModal}
         showModal={showModal}
         style={{
-          width: "100%",
-          height: isLandscape ? "80%" : "100%",
+          flex: 1,
         }}
         title={title}
         setTitle={setTitle}

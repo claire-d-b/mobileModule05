@@ -23,9 +23,10 @@ const _ = ({ isLandscape, setRating, color, focusColor }: Props) => {
   const [checked, setChecked] = React.useState("rate_2");
 
   return (
-    <View style={{ display: "flex", width: "100%", padding: 20 }}>
+    <View style={{ display: "flex", width: "100%" }}>
       <View
         style={{
+          margin: 0,
           display: "flex",
           flexDirection: isLandscape ? "row" : "column",
           alignItems: "center",
