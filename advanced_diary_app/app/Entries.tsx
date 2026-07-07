@@ -252,8 +252,7 @@ const _ = ({ login }: Props) => {
         hideModal={hideModal}
         showModal={showModal}
         style={{
-          width: "100%",
-          height: isLandscape ? "80%" : "100%",
+          flex: 1,
         }}
         title={title}
         setTitle={setTitle}
