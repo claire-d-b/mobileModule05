@@ -9,10 +9,6 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 WebBrowser.maybeCompleteAuthSession();
 
 const RootLayoutNav = () => {
-  useEffect(() => {
-    ScreenOrientation.unlockAsync();
-  }, []);
-
   return <Stack screenOptions={{ headerShown: false }} />;
 };
 

@@ -43,6 +43,7 @@ const _ = ({
     backgroundColor: "white",
     paddingHorizontal: 10,
     margin: 10,
+    marginTop: isLandscape ? 0 : 10,
     borderRadius: 10,
   };
 

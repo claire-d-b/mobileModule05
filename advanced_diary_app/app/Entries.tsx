@@ -214,8 +214,8 @@ const _ = ({ login }: Props) => {
   return (
     <View
       style={{
-        display: "flex",
-        width: "100%",
+        // display: "flex",
+        // width: "100%",
         flex: 1,
         // paddingVertical: 20,
         flexDirection: "column",
@@ -252,6 +252,8 @@ const _ = ({ login }: Props) => {
         hideModal={hideModal}
         showModal={showModal}
         style={{
+          justifyContent: isLandscape ? "flex-start" : "center",
+          marginTop: isLandscape ? 30 : 50,
           flex: 1,
         }}
         title={title}
