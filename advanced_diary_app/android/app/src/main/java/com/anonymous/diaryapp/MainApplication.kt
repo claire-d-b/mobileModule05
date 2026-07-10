@@ -1,4 +1,4 @@
-package com.clairedb.myapp
+package com.anonymous.diaryapp
 
 import android.app.Application
 import android.content.res.Configuration

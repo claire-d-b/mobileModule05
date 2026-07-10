@@ -9,6 +9,7 @@ import CChip from "./CChip";
 import CAvatar from "./CAvatar";
 import CDelete from "./CDelete";
 import CViewEntry from "./CViewEntry";
+import useGoogleAuth from "../auth/auth_google";
 import { formatDate } from "../utils/utils";
 
 const emotions = [
@@ -49,6 +50,8 @@ const errorColor = "#A12237";
 const _ = ({ login }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+
+  const { signOutGoogle } = useGoogleAuth();
 
   const [visibleDialog, setVisibleDialog] = useState(false);
   const showDialog = () => setVisibleDialog(true);
@@ -183,9 +186,16 @@ const _ = ({ login }: Props) => {
   const logout = async () => {
     setIsLoading(true);
     try {
+      await signOutGoogle();
+    } catch (e) {
+      console.warn("Google sign-out failed:", e);
+    }
+    try {
       await getAuth().signOut();
     } catch (_) {}
     await setLocalLogin(null);
+    setIsLoading(false);
+    router.replace("/signin"); // ← ajoute ceci
   };
 
   useEffect(() => {
@@ -196,7 +206,7 @@ const _ = ({ login }: Props) => {
     fetchEntries(0, login);
     fetchStats();
     setPage(0);
-  }, []);
+  }, [localLogin, login]);
 
   return (
     <View

@@ -204,9 +204,14 @@ const _ = ({ login }: Props) => {
   };
 
   useEffect(() => {
-    fetchEntries(page);
+    setEmail(login ?? null);
+  }, [login]);
+
+  useEffect(() => {
+    if (!login) return;
+    fetchEntries(0, login); // ← passe explicitement login, pas `page`
     setPage(0);
-  }, []);
+  }, [login]);
 
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
