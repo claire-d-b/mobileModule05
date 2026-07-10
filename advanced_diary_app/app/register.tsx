@@ -12,7 +12,7 @@ interface Information {
   npassword: string;
 }
 
-const backendUrl = "http://192.168.1.15:3000";
+const backendUrl = "http://192.168.1.164:3000";
 
 const _ = () => {
   const [login, setLogin] = useState("");
