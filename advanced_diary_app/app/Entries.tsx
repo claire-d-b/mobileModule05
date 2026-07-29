@@ -18,7 +18,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.164:3000";
+const backendUrl = "http://192.168.1.192:3000";
 
 interface Entry {
   id: number;
@@ -29,13 +29,14 @@ interface Entry {
   created_at: string;
 }
 
-interface PaginatedResponse {
+interface Props {
+  login: string | null;
   entries: Entry[];
   page: number;
-  total: number;
-  totalPages: number;
+  setPage: (p: number) => void;
   hasNext: boolean;
   hasPrev: boolean;
+  fetchEntries: (pageNumber?: number, email?: string | null) => Promise<void>;
 }
 
 export const getEllipsis = (text: string, maxLength: number): string => {
@@ -47,12 +48,17 @@ interface Props {
   login: string | null;
 }
 
-const _ = ({ login }: Props) => {
+const _ = ({
+  login,
+  entries,
+  page,
+  setPage,
+  hasNext,
+  hasPrev,
+  fetchEntries,
+}: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
-
-  const [hasNext, setHasNext] = useState(false);
-  const [hasPrev, setHasPrev] = useState(false);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -73,11 +79,6 @@ const _ = ({ login }: Props) => {
   };
   const showDetails = () => setDetails(true);
 
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-
-  const [entries, setEntries] = useState<Entry[]>([]);
-
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
 
@@ -90,30 +91,6 @@ const _ = ({ login }: Props) => {
 
   const auth = getAuth();
   const [email, setEmail] = useState<string | null>(login ?? null);
-
-  const fetchEntries = async (
-    pageNumber = 0,
-    resolvedEmail?: string | null,
-  ) => {
-    const emailToUse = resolvedEmail ?? email;
-    if (!emailToUse) return;
-
-    try {
-      const res = await fetch(
-        `${backendUrl}/entries/${encodeURIComponent(emailToUse)}?page=${pageNumber}`,
-      );
-      const data = await res.json();
-      if (!res.ok) return;
-
-      const list: Entry[] = data.entries ?? [];
-      setEntries(list);
-      setPressed(new Array(list.length).fill(false));
-      setHasNext(data.hasNext); // ✅
-      setHasPrev(data.hasPrev); // ✅
-    } catch (err) {
-      console.error("❌ Error fetching entries:", err);
-    }
-  };
 
   const handleSubmit = async () => {
     setMessage("");
@@ -204,12 +181,9 @@ const _ = ({ login }: Props) => {
   };
 
   useEffect(() => {
-    setEmail(login ?? null);
-  }, [login]);
-
-  useEffect(() => {
     if (!login) return;
-    fetchEntries(0, login); // ← passe explicitement login, pas `page`
+    setEmail(login ?? null);
+    fetchEntries(0, login);
     setPage(0);
   }, [login]);
 

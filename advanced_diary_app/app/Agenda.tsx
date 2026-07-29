@@ -7,7 +7,7 @@ import CDelete from "./CDelete";
 import CViewEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
 
-const backendUrl = "http://192.168.1.164:3000";
+const backendUrl = "http://192.168.1.192:3000";
 
 const emotions = [
   "emoticon",
@@ -28,11 +28,17 @@ interface Entry {
 
 interface Props {
   login: string | null;
+  entries: Entry[];
+  fetchEntries: (pageNumber?: number, email?: string | null) => Promise<void>;
 }
 
-const _ = ({ login }: Props) => {
+const _ = ({ login, entries, fetchEntries }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+
+  const [date, setDate] = useState<Date>(new Date());
+
+  const [list, setList] = useState<Entry[]>([]);
 
   const containerStyle = {
     backgroundColor: "white",
@@ -55,19 +61,16 @@ const _ = ({ login }: Props) => {
   };
   const showDetails = () => setDetails(true);
   const [pressed, setPressed] = useState<boolean[]>([false]);
-  const [entries, setEntries] = useState<Entry[]>([]);
 
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
-
-  const [date, setDate] = React.useState<Date | undefined>(undefined);
 
   const [page, setPage] = React.useState(0);
 
   const loadMore = async () => {
     if (hasNext) {
       const nextPage = page + 1;
-      await fetchEntriesByDate(date ?? new Date(), nextPage); // ← nextPage pas page
+      await fetchEntriesByDate(date, nextPage); // ← nextPage pas page
       setPage(nextPage);
     }
   };
@@ -75,7 +78,7 @@ const _ = ({ login }: Props) => {
   const loadLess = async () => {
     if (hasPrev) {
       const nextPage = page - 1;
-      await fetchEntriesByDate(date ?? new Date(), nextPage); // ← nextPage pas page
+      await fetchEntriesByDate(date, nextPage); // ← nextPage pas page
       setPage(nextPage);
     }
   };
@@ -95,7 +98,7 @@ const _ = ({ login }: Props) => {
       const data = await res.json();
       if (!res.ok) return;
 
-      setEntries(data.entries ?? []);
+      setList(data.entries ?? []);
       setPage(data.page ?? 0);
       setHasNext(data.hasNext ?? false);
       setHasPrev(data.hasPrev ?? false);
@@ -115,14 +118,14 @@ const _ = ({ login }: Props) => {
         return;
       }
       console.log("Entry deleted:", data.entry);
-      fetchEntriesByDate(date ?? new Date(), page);
+      fetchEntriesByDate(date, page);
     } catch (err) {
       console.error("Error deleting entry:", err);
     }
   };
 
   useEffect(() => {
-    fetchEntriesByDate(date ?? new Date(), page);
+    fetchEntriesByDate(date, page);
   }, [date]);
 
   return (
@@ -144,14 +147,14 @@ const _ = ({ login }: Props) => {
             borderRadius: 10,
           }}
         >
-          <CCalendar date={date ?? new Date()} setDate={setDate} />
+          <CCalendar date={date} setDate={setDate} />
         </View>
         <View
           style={{
             flex: 1,
           }}
         >
-          {entries && entries.length >= 4 && (
+          {list && list.length >= 4 && (
             <Text
               style={{
                 color: "#534DB3",
@@ -164,9 +167,9 @@ const _ = ({ login }: Props) => {
             </Text>
           )}
           <ScrollView style={{ flex: 1 }}>
-            {(entries &&
-              entries.length > 0 &&
-              entries.map((e, i) => {
+            {(list &&
+              list.length > 0 &&
+              list.map((e, i) => {
                 return (
                   <View
                     key={`entry_agenda_${i}`}

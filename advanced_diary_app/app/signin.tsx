@@ -9,16 +9,16 @@ import useGoogleAuth from "../auth/auth_google";
 import useGithubAuth from "../auth/auth_github";
 import CTextInput from "./CTextInput";
 import CButton from "./CButton";
-import Loading from "./loading";
+import CLoading from "./CLoading";
 
 interface Information {
   login: string;
   password: string;
 }
 
-const backendUrl = "http://192.168.1.164:3000";
+const backendUrl = "http://192.168.1.192:3000";
 
-const _ = () => {
+const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -41,33 +41,32 @@ const _ = () => {
 
       if (!res.ok) {
         setError(data.error || "Login failed");
-        console.error("❌ Login failed:", data.error);
-        setIsLoading(false);
+        console.error("Login failed:", data.error);
+        setIsLoading(false); // cache loading si erreur
         return;
       }
 
       const provider = data.user?.provider;
-      console.log("PROVIDER", provider);
-      console.log("✅ Backend login success, provider:", provider);
+      console.log("Backend login success, provider:", provider);
 
       if (provider === "local") {
-        // Compte local → pas de Firebase
+        // Compte local => pas de Firebase
         await setLocalLogin(login);
-        console.log("✅ Backend registration success:", data.user);
+        console.log("Backend registration success:", data.user);
         router.replace("/home");
       } else {
-        // Compte Google/GitHub → Firebase
+        // Compte Google/GitHub => Firebase
         await signInWithEmailAndPassword(auth, login, password);
         setLogin("");
-        // _layout.tsx redirige via onAuthStateChanged
+        router.replace("/home");
       }
-    } catch (err) {
-      console.error("❌ Error during login:", err);
+    } catch (e) {
+      console.error("Error during login:", e);
       setError("An error occurred");
-      setIsLoading(false);
+      setIsLoading(false); // cache loading si erreur
     }
   };
-  if (isLoading) return <Loading />;
+  if (isLoading) return <CLoading />;
 
   return (
     <View
@@ -158,10 +157,10 @@ const _ = () => {
         />
         <CButton
           onPress={() => {
-            setIsLoading(true); // ← affiche loading avant d'ouvrir le navigateur
+            setIsLoading(true); // affiche loading avant d'ouvrir le navigateur
             googleRequest &&
               googlePrompt().then((result) => {
-                // Si l'utilisateur annule ou si ça échoue, on remet isLoading à false
+                // si l'utilisateur annule ou si ça échoue, on remet isLoading à false
                 if (result?.type !== "success") {
                   setIsLoading(false);
                 }
@@ -196,4 +195,4 @@ const _ = () => {
   );
 };
 
-export default _;
+export default SignIn;

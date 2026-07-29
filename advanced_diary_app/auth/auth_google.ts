@@ -3,34 +3,30 @@ import { useEffect, useState } from "react";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import auth from "../config/firebase";
 
-const backendUrl = "http://192.168.1.164:3000";
+const backendUrl = "http://192.168.1.192:3000";
 
 const useGoogleAuth = () => {
+  const [lastAccessToken, setLastAccessToken] = useState<string | null>(null);
+
   const [request, response, promptAsync] = Google.useAuthRequest({
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    extraParams: {
-      prompt: "select_account", // force le choix du compte à chaque fois
-    },
   });
-
-  const [lastAccessToken, setLastAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (response?.type !== "success") return;
 
     const signIn = async () => {
       const { authentication } = response;
+
       const accessToken = authentication?.accessToken;
       const idToken = authentication?.idToken;
 
       if (!accessToken || !idToken) {
-        console.error("❌ Missing tokens");
+        console.error("Missing tokens");
         return;
       }
-
-      setLastAccessToken(accessToken);
 
       try {
         const res = await fetch(`${backendUrl}/auth/google`, {
@@ -38,18 +34,23 @@ const useGoogleAuth = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: accessToken }),
         });
+
         const data = await res.json();
+
         if (!res.ok) {
-          console.error("❌ Backend Google error:", data.error);
+          console.error("Backend Google error:", data.error);
           return;
         }
-        console.log("✅ Google user in DB:", data.user);
 
+        console.log("Google user in DB:", data.user);
+
+        // Ce code finalise l'authentification Google côté Firebase, après que l'utilisateur se soit connecté via le flux OAuth Google.
         const credential = GoogleAuthProvider.credential(idToken);
         await signInWithCredential(auth, credential);
-        console.log("✅ Google login success:", data.user.login);
-      } catch (err) {
-        console.error("❌ Google auth error:", err);
+
+        console.log("Google login success:", data.user.login);
+      } catch (e) {
+        console.error("Google auth error:", e);
       }
     };
 
@@ -64,9 +65,9 @@ const useGoogleAuth = () => {
           `https://oauth2.googleapis.com/revoke?token=${lastAccessToken}`,
           { method: "POST" },
         );
-        console.log("✅ Google token revoked");
+        console.log("Google token revoked");
       } catch (e) {
-        console.warn("⚠️ Failed to revoke Google token:", e);
+        console.warn("Failed to revoke Google token:", e);
       }
       setLastAccessToken(null);
     }

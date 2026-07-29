@@ -2,7 +2,7 @@ import { Calendar } from "react-native-calendars";
 
 interface Props {
   date: Date;
-  setDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  setDate: React.Dispatch<React.SetStateAction<Date>>;
 }
 
 const _ = ({ date, setDate }: Props) => {

@@ -1,4 +1,3 @@
-// backend/server.ts
 import express from "express";
 import type { Request, Response } from "express";
 import pg from "pg";
@@ -10,8 +9,6 @@ dotenv.config();
 
 const app = express();
 
-app.use(express.json());
-
 app.get("/", (req, res) => {
   res.send("Backend works");
 });
@@ -20,9 +17,12 @@ app.listen(3000, "0.0.0.0", () => {
   console.log("Server running on 3000");
 });
 
-// ✅ Middlewares AVANT les routes
+// Middlewares Express avant les routes
+// Active CORS (Cross-Origin Resource Sharing). Sans ça, un navigateur bloquerait par défaut les requêtes venant d'une origine différente (par exemple, ton frontend sur localhost:8081 qui appelle ton backend sur localhost:3000
 app.use(cors());
+// Permet à Express de comprendre et parser automatiquement le corps des requêtes envoyées au format JSON (Content-Type: application/json). Sans ce middleware, req.body serait undefined quand un client envoie du JSON — avec lui, Express le parse et le rend disponible directement en objet JavaScript via req.body.
 app.use(express.json());
+// Pour les forms - parse les données du corps de la requete et les traduit en objet javascript accessible via req.body.
 app.use(express.urlencoded({ extended: true }));
 
 const { Pool } = pg;
@@ -35,7 +35,6 @@ const pool = new Pool({
   port: Number(process.env.DB_PORT) || 5432,
 });
 
-// Types
 interface RegisterBody {
   login: string;
   password: string;
@@ -71,49 +70,6 @@ interface GoogleProfile {
   email: string;
 }
 
-// Init DB
-const initDB = async (): Promise<void> => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        login VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255),
-        provider VARCHAR(50) DEFAULT 'local',
-        provider_id VARCHAR(255),
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS diary_entries (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        date DATE NOT NULL DEFAULT CURRENT_DATE,
-        title VARCHAR(255),
-        feeling INTEGER CHECK (feeling BETWEEN 1 AND 5),
-        content TEXT,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-      );
-    `);
-
-    // Migrations — sécurisées si colonnes existent déjà
-    await pool.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS provider VARCHAR(50) DEFAULT 'local';
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS provider_id VARCHAR(255);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
-    `);
-
-    console.log("✅ Tables ready");
-  } catch (err) {
-    console.error("❌ DB init failed:", err);
-  }
-};
-
-// initDB().then(() => {
-//   app.listen(3000, () => console.log("Server running on port 3000"));
-// });
-
 // REGISTER USER
 app.post(
   "/user/register",
@@ -129,9 +85,10 @@ app.post(
       );
       console.log("✅ User registered:", result.rows[0]);
       res.json({ message: "Registration success", user: result.rows[0] });
-    } catch (err: any) {
-      console.error(err);
-      if (err.code === "23505") {
+    } catch (e: any) {
+      console.error(e);
+      // 23505 est le code d'erreur PostgreSQL pour une violation de contrainte unique
+      if (e.code === "23505") {
         return res.status(400).json({ error: "Login already exists" });
       }
       res.status(500).json({ error: "Registration failed" });
@@ -175,8 +132,8 @@ app.post(
         message: "Login success",
         user: { id: user.id, login: user.login, provider: user.provider },
       });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       res.status(500).json({ error: "Login failed" });
     }
   },
@@ -187,7 +144,7 @@ app.post(
   "/auth/github",
   async (req: Request<{}, {}, GithubAuthBody>, res: Response) => {
     const { code } = req.body;
-    console.log("📡 GitHub code reçu:", code);
+    console.log("GitHub code reçu:", code);
     try {
       const response = await fetch(
         "https://github.com/login/oauth/access_token",
@@ -231,10 +188,11 @@ app.post(
         [login, String(profile.id)],
       );
 
-      console.log("✅ GitHub user upserted:", result.rows[0]);
+      console.log("GitHub user upserted:", result.rows[0]);
+      // result.rows[0] -> la première — et seule — ligne renvoyée par le RETURNING de la requête SQL juste avant)
       res.json({ access_token: data.access_token, user: result.rows[0] });
-    } catch (err) {
-      console.error("❌ GitHub auth error:", err);
+    } catch (e) {
+      console.error("GitHub auth error:", e);
       res.status(500).json({ error: "GitHub auth failed" });
     }
   },
@@ -252,7 +210,7 @@ app.post(
           headers: { Authorization: `Bearer ${token}` },
         },
       ).then((r) => r.json())) as GoogleProfile;
-      console.log("✅ Google profile:", profile);
+      console.log("Google profile:", profile);
 
       if (!profile.sub)
         return res.status(400).json({ error: "Invalid Google token" });
@@ -267,12 +225,12 @@ app.post(
            updated_at = NOW()
        RETURNING id, login, provider`,
         [profile.email, String(profile.sub)],
-      );
+      ); // Concrètement, sub est l'identifiant unique et permanent de ce compte Google — un numéro qui ne change jamais, propre à ce compte utilisateur spécifique.
 
-      console.log("✅ Google user upserted:", result.rows[0]);
+      console.log("Google user upserted:", result.rows[0]);
       res.json({ user: result.rows[0] });
-    } catch (err) {
-      console.error("❌ Google auth error:", err);
+    } catch (e) {
+      console.error("Google auth error:", e);
       res.status(500).json({ error: "Google auth failed" });
     }
   },
@@ -297,8 +255,8 @@ app.post(
         [user_id, date, title, feeling, content],
       );
       res.json(result.rows[0]);
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       res.status(500).json({ error: "Failed to create entry" });
     }
   },
@@ -319,12 +277,13 @@ app.get("/entries/:email", async (req, res) => {
       [email],
     );
     const total = Number(countResult.rows[0].count);
-
+    // offset : combien d'entrées "sauter" avant de commencer à lire (page 0 → offset 0, page 1 → offset 6, page 2 → offset 12...).
+    // e and u aliases for diary entries and users
     const result = await pool.query(
       `SELECT e.* FROM diary_entries e
        JOIN users u ON e.user_id = u.id
        WHERE u.login = $1
-       ORDER BY e.created_at DESC
+       ORDER BY updated_at DESC
        LIMIT $2 OFFSET $3`,
       [email, limit, offset],
     );
@@ -334,7 +293,7 @@ app.get("/entries/:email", async (req, res) => {
       hasNext: offset + limit < total,
       hasPrev: page > 0,
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch entries" });
   }
 });
@@ -355,8 +314,8 @@ app.get(
       );
 
       res.json({ count: parseInt(result.rows[0].count) });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       res.status(500).json({ error: "Failed to count entries" });
     }
   },
@@ -377,7 +336,10 @@ app.get(
        ORDER BY feeling`,
         [email],
       );
-
+      // sum : l'accumulateur — la somme calculée jusqu'à présent.
+      // r : la ligne actuelle du tableau (ex: { feeling: "2", count: "3" }).
+      // parseInt(r.count) : convertit le count (qui est du texte, car PostgreSQL renvoie les nombres sous forme de string) en vrai nombre.
+      // 0 : la valeur de départ de sum (on commence à compter à partir de zéro).
       const total = result.rows.reduce((sum, r) => sum + parseInt(r.count), 0);
       const stats = [1, 2, 3, 4, 5].reduce(
         (acc, f) => {
@@ -393,8 +355,8 @@ app.get(
       );
 
       res.json({ stats, total });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       res.status(500).json({ error: "Failed to fetch stats" });
     }
   },
@@ -407,16 +369,16 @@ app.delete(
     const { id } = req.params;
     try {
       const result = await pool.query(
-        "DELETE FROM diary_entries WHERE id = $1 RETURNING *",
+        "DELETE FROM diary_entries WHERE id = $1 RETURNING *", // returns all columns in deleted entry, not just id
         [id],
       );
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "Entry not found" });
       }
-      console.log("✅ Entry deleted:", result.rows[0]);
+      console.log("Entry deleted:", result.rows[0]);
       res.json({ message: "Entry deleted", entry: result.rows[0] });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       res.status(500).json({ error: "Failed to delete entry" });
     }
   },
@@ -445,7 +407,7 @@ app.get(
         `SELECT e.* FROM diary_entries e
          JOIN users u ON e.user_id = u.id
          WHERE u.login = $1 AND e.date = $2
-         ORDER BY e.created_at DESC
+         ORDER BY e.updated_at DESC
          LIMIT $3 OFFSET $4`,
         [email, date, limit, offset],
       );
@@ -458,8 +420,8 @@ app.get(
         hasNext: offset + limit < total,
         hasPrev: page > 0,
       });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       res.status(500).json({ error: "Failed to fetch entries by date" });
     }
   },
