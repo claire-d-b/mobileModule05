@@ -20,7 +20,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
 
 interface Entry {
   id: number;
@@ -29,15 +29,6 @@ interface Entry {
   feeling: number;
   content: string;
   created_at: string;
-}
-
-interface PaginatedResponse {
-  entries: Entry[];
-  page: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
 }
 
 interface Props {
@@ -64,31 +55,12 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
   const showDetails = () => setDetails(true);
 
-  const [pressed, setPressed] = useState<boolean[]>([false]);
-
   const { localLogin, setLocalLogin } = useAuthContext();
-
-  const auth = getAuth();
-
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [feeling, setFeeling] = useState(3);
-
-  const [visible, setVisible] = useState(false);
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
-
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
 
   const [totalNbOfEntries, setTotalNbOfEntries] = useState(0);
 
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
-
-  const [message, setMessage] = useState("");
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const containerStyle = {
     backgroundColor: "white",
@@ -109,11 +81,10 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
         `${backendUrl}/entries/${encodeURIComponent(login)}/stats`,
       );
       const data = await res.json();
-      console.log("📊 stats:", data);
       setStats(data.stats ?? {});
       console.log("stats", data.stats);
-    } catch (err) {
-      console.error("❌ fetchStats:", err);
+    } catch (e) {
+      console.error("fetchStats:", e);
     }
   };
 
@@ -131,21 +102,15 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
       try {
         data = JSON.parse(text);
       } catch (e) {
-        console.log("❌ count not JSON:", text);
+        console.log("count not JSON:", text);
         return;
       }
 
       setTotalNbOfEntries(data.count ?? 0);
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
     }
   };
-
-  interface Props {
-    login: string | null;
-    entries: Entry[];
-    fetchEntries: (pageNumber?: number, email?: string | null) => Promise<void>;
-  }
 
   const deleteEntry = async (id: number) => {
     try {
@@ -154,20 +119,19 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
       });
       const data = await res.json();
       if (!res.ok) {
-        console.error("❌ Failed to delete entry:", data.error);
+        console.error("Failed to delete entry:", data.error);
         return;
       }
       console.log("✅ Entry deleted:", data.entry);
-      await fetchEntries(0, login); // ← celui de Home, met à jour le state partagé
+      await fetchEntries(0, login); // celui de Home, met à jour le state partagé
       fetchCount();
       fetchStats();
-    } catch (err) {
-      console.error("❌ Error deleting entry:", err);
+    } catch (e) {
+      console.error("Error deleting entry:", e);
     }
   };
 
   const logout = async () => {
-    setIsLoading(true);
     try {
       await signOutGoogle();
     } catch (e) {
@@ -177,8 +141,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
       await getAuth().signOut();
     } catch (_) {}
     await setLocalLogin(null);
-    setIsLoading(false);
-    router.replace("/signin"); // ← ajoute ceci
+    router.replace("/signin");
   };
 
   useEffect(() => {
@@ -195,7 +158,6 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
     fetchCount();
     fetchEntries(0, login);
     fetchStats();
-    setPage(0);
   }, [localLogin, login]);
 
   return (
@@ -347,7 +309,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
                       >
                         <CIconButton
                           icon="magnify"
-                          iconColor={pressed[i] ? "white" : "#534DB3"}
+                          iconColor="#534DB3"
                           containerColor="transparent"
                           size={20}
                           onPress={() => {
@@ -357,7 +319,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
                         />
                         <CIconButton
                           icon="trash-can-outline"
-                          iconColor={pressed[i] ? "white" : "#534DB3"}
+                          iconColor="#534DB3"
                           containerColor="transparent"
                           size={20}
                           onPress={() => {

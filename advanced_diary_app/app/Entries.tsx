@@ -18,7 +18,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
 
 interface Entry {
   id: number;
@@ -82,7 +82,6 @@ const _ = ({
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
 
-  const [pressed, setPressed] = useState<boolean[]>([false]);
   const containerStyle = {
     backgroundColor: "white",
     margin: 20,
@@ -99,8 +98,8 @@ const _ = ({
       setType("error");
       return;
     }
-    console.log("📡 auth.currentUser:", auth.currentUser?.email);
-    console.log("📡 email utilisé:", email);
+    console.log("auth.currentUser:", auth.currentUser?.email);
+    console.log("email utilisé:", email);
 
     try {
       const res = await fetch(`${backendUrl}/entries`, {
@@ -118,11 +117,11 @@ const _ = ({
       const data = await res.json();
 
       if (!res.ok) {
-        console.error("❌ Failed to create entry:", data.error);
+        console.error("Failed to create entry:", data.error);
         return;
       }
 
-      console.log("✅ Entry created:", data);
+      console.log("Entry created:", data);
       setMessage("Entry successfully created!");
       setType("success");
 
@@ -131,9 +130,8 @@ const _ = ({
       setContent("");
       setFeeling(1);
       await fetchEntries(0, email);
-      // hideModal();
-    } catch (err) {
-      console.error("❌ Error creating entry:", err);
+    } catch (e) {
+      console.error("Error creating entry:", e);
     }
   };
 
@@ -144,12 +142,12 @@ const _ = ({
       });
       const data = await res.json();
       if (!res.ok) {
-        console.error("❌ Failed to delete entry:", data.error);
+        console.error("Failed to delete entry:", data.error);
         return;
       }
-      console.log("✅ Entry deleted:", data.entry);
+      console.log("Entry deleted:", data.entry);
 
-      // ← si c'était la dernière entrée de la page, revenir à la page précédente
+      // si c'était la dernière entrée de la page, revenir à la page précédente
       if (entries.length === 1 && page > 0) {
         const prevPage = page - 1;
         setPage(prevPage);
@@ -157,14 +155,13 @@ const _ = ({
       } else {
         await fetchEntries(page, email);
       }
-    } catch (err) {
-      console.error("❌ Error deleting entry:", err);
+    } catch (e) {
+      console.error("Error deleting entry:", e);
     }
   };
 
   const loadMore = async () => {
     if (hasNext) {
-      // ✅ au lieu de page < totalPages
       const nextPage = page + 1;
       await fetchEntries(nextPage, email);
       setPage(nextPage);
@@ -173,7 +170,6 @@ const _ = ({
 
   const loadLess = async () => {
     if (hasPrev) {
-      // ✅ au lieu de page > 0
       const nextPage = page - 1;
       await fetchEntries(nextPage, email);
       setPage(nextPage);
@@ -193,12 +189,8 @@ const _ = ({
   return (
     <View
       style={{
-        // display: "flex",
-        // width: "100%",
         flex: 1,
-        // paddingVertical: 20,
         flexDirection: "column",
-        // justifyContent: "space-around",
         alignItems: "center",
         backgroundColor: "white",
       }}
@@ -273,7 +265,7 @@ const _ = ({
                   padding: isLandscape ? 3 : 5,
                   justifyContent: "center",
                   alignItems: "center",
-                  backgroundColor: pressed[i] ? "#534DB3" : "#BBB0D1",
+                  backgroundColor: "#BBB0D1",
                   borderRadius: 10,
                 }}
               >
@@ -313,15 +305,14 @@ const _ = ({
                   disabled={true}
                   theme={{
                     colors: {
-                      onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
+                      onSurfaceDisabled: "white",
                     },
                   }}
                 />
                 <Text
                   style={{
-                    // flex: 1,
                     alignSelf: "center",
-                    color: pressed[i] ? "white" : "#353172",
+                    color: "#353172",
                   }}
                 >
                   {(isLandscape && getEllipsis(e.title, 10)) ||
@@ -337,21 +328,21 @@ const _ = ({
                 >
                   <CIconButton
                     icon="magnify"
-                    iconColor={pressed[i] ? "white" : "#534DB3"}
+                    iconColor="#534DB3"
                     containerColor="transparent"
                     size={20}
                     onPress={() => {
-                      setSelectedIndex(i); // ← add this
+                      setSelectedIndex(i);
                       showDetails();
                     }}
                   />
                   <CIconButton
                     icon="trash-can-outline"
-                    iconColor={pressed[i] ? "white" : "#534DB3"}
+                    iconColor="#534DB3"
                     containerColor="transparent"
                     size={20}
                     onPress={() => {
-                      setEntryToDelete(e.id); // ← stocke le bon id
+                      setEntryToDelete(e.id);
                       showDialog();
                     }}
                   />

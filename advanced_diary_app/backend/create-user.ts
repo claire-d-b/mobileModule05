@@ -13,6 +13,7 @@ const pool = new Pool({
 
 const seedTestUser = async (): Promise<void> => {
   try {
+    // --- Local user (email + password) ---
     const testPassword = process.env.TEST_USER_PASSWORD;
     if (!testPassword) throw new Error("Missing TEST_USER_PASSWORD in .env");
     const hashedPassword = await bcrypt.hash(testPassword, 10);
@@ -24,10 +25,24 @@ const seedTestUser = async (): Promise<void> => {
        RETURNING id, login`,
       ["test_user", hashedPassword],
     );
-    const user = userResult.rows[0];
-    console.log(`✅ User created: ${user.login} (id: ${user.id})`);
+    const localUser = userResult.rows[0];
+    console.log(`Local user created: ${localUser.login} (id: ${localUser.id})`);
 
-    const entries = [
+    // --- Google user (no local password) ---
+    const emailUserResult = await pool.query(
+      `INSERT INTO users (login, password, provider)
+       VALUES ($1, $2, 'google')
+       ON CONFLICT (login) DO UPDATE SET provider = EXCLUDED.provider
+       RETURNING id, login`,
+      ["sdiaryapp@gmail.com", null],
+    );
+    const googleUser = emailUserResult.rows[0];
+    console.log(
+      `Google user created: ${googleUser.login} (id: ${googleUser.id})`,
+    );
+
+    // --- Entries for local user ---
+    const localEntries = [
       // --- 10 entries on 2026-05-15 (pagination testing) ---
       {
         date: "2026-05-15",
@@ -166,17 +181,82 @@ const seedTestUser = async (): Promise<void> => {
       },
     ];
 
-    for (const entry of entries) {
+    for (const entry of localEntries) {
       await pool.query(
         `INSERT INTO diary_entries (user_id, date, title, feeling, content)
          VALUES ($1, $2, $3, $4, $5)`,
-        [user.id, entry.date, entry.title, entry.feeling, entry.content],
+        [localUser.id, entry.date, entry.title, entry.feeling, entry.content],
       );
     }
+    console.log(
+      `${localEntries.length} diary entries inserted for ${localUser.login}`,
+    );
 
-    console.log(`✅ ${entries.length} diary entries inserted`);
-  } catch (err) {
-    console.error("❌ Seeding failed:", err);
+    // --- Entries for Google user ---
+    const googleEntries = [
+      {
+        date: "2026-05-20",
+        title: "New login flow",
+        feeling: 4,
+        content: "Signed in with Google for the first time. Nice and smooth.",
+      },
+      {
+        date: "2026-05-22",
+        title: "First real entry",
+        feeling: 3,
+        content:
+          "Trying this diary app out properly now. Curious to see how it goes.",
+      },
+      {
+        date: "2026-06-01",
+        title: "Busy week ahead",
+        feeling: 2,
+        content: "Calendar is packed. Bracing myself.",
+      },
+      {
+        date: "2026-06-10",
+        title: "Nice surprise",
+        feeling: 5,
+        content: "Old friend reached out out of nowhere. Made my day.",
+      },
+      {
+        date: "2026-06-18",
+        title: "Quiet Sunday",
+        feeling: 4,
+        content: "Did nothing productive and it was exactly what I needed.",
+      },
+      {
+        date: "2026-06-25",
+        title: "Small win",
+        feeling: 4,
+        content: "Finally fixed that flaky test. Weirdly satisfying.",
+      },
+      {
+        date: "2026-07-02",
+        title: "Overwhelmed",
+        feeling: 1,
+        content: "Too many things at once today. Need to slow down tomorrow.",
+      },
+      {
+        date: "2026-07-10",
+        title: "Good news",
+        feeling: 5,
+        content: "Got some news that made the whole week feel worth it.",
+      },
+    ];
+
+    for (const entry of googleEntries) {
+      await pool.query(
+        `INSERT INTO diary_entries (user_id, date, title, feeling, content)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [googleUser.id, entry.date, entry.title, entry.feeling, entry.content],
+      );
+    }
+    console.log(
+      `${googleEntries.length} diary entries inserted for ${googleUser.login}`,
+    );
+  } catch (e) {
+    console.error("Seeding failed:", e);
   } finally {
     await pool.end();
   }

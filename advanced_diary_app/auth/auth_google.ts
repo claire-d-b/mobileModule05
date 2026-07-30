@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import auth from "../config/firebase";
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
 
 const useGoogleAuth = () => {
   const [lastAccessToken, setLastAccessToken] = useState<string | null>(null);

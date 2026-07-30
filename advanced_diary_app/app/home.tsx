@@ -7,7 +7,7 @@ import Profile from "./Profile";
 import Agenda from "./Agenda";
 import Entries from "./Entries";
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
 
 interface Entry {
   id: number;
@@ -45,8 +45,8 @@ const _ = () => {
       setEntries(list);
       setHasNext(data.hasNext);
       setHasPrev(data.hasPrev);
-    } catch (err) {
-      console.error("❌ Error fetching entries:", err);
+    } catch (e) {
+      console.error("Error fetching entries:", e);
     }
   };
 

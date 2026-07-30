@@ -18,7 +18,6 @@ const _ = ({ visibleDialog, hideDialog, deleteEntry, idx }: Props) => {
           style={{
             display: "flex",
             width: "100%",
-            // height: "100%",
             backgroundColor: "transparent",
           }}
         >
@@ -37,7 +36,6 @@ const _ = ({ visibleDialog, hideDialog, deleteEntry, idx }: Props) => {
                   flexDirection: "row",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  // padding: 20,
                 }}
               >
                 <Dialog.Title style={{ color: "#534DB3" }}>

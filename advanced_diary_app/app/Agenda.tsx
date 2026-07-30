@@ -7,7 +7,7 @@ import CDelete from "./CDelete";
 import CViewEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
 
-const backendUrl = "http://192.168.1.192:3000";
+const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
 
 const emotions = [
   "emoticon",
@@ -60,7 +60,6 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
     setDetails(false);
   };
   const showDetails = () => setDetails(true);
-  const [pressed, setPressed] = useState<boolean[]>([false]);
 
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
@@ -70,7 +69,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   const loadMore = async () => {
     if (hasNext) {
       const nextPage = page + 1;
-      await fetchEntriesByDate(date, nextPage); // ← nextPage pas page
+      await fetchEntriesByDate(date, nextPage);
       setPage(nextPage);
     }
   };
@@ -78,7 +77,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   const loadLess = async () => {
     if (hasPrev) {
       const nextPage = page - 1;
-      await fetchEntriesByDate(date, nextPage); // ← nextPage pas page
+      await fetchEntriesByDate(date, nextPage);
       setPage(nextPage);
     }
   };
@@ -102,8 +101,8 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
       setPage(data.page ?? 0);
       setHasNext(data.hasNext ?? false);
       setHasPrev(data.hasPrev ?? false);
-    } catch (err) {
-      console.error("Error fetching entries by date:", err);
+    } catch (e) {
+      console.error("Error fetching entries by date:", e);
     }
   };
 
@@ -119,8 +118,8 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
       }
       console.log("Entry deleted:", data.entry);
       fetchEntriesByDate(date, page);
-    } catch (err) {
-      console.error("Error deleting entry:", err);
+    } catch (e) {
+      console.error("Error deleting entry:", e);
     }
   };
 
@@ -237,7 +236,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
                             disabled={true}
                             theme={{
                               colors: {
-                                onSurfaceDisabled: "white", // ← couleur de l'icône quand disabled
+                                onSurfaceDisabled: "white",
                               },
                             }}
                           />
@@ -262,21 +261,21 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
                           >
                             <CIconButton
                               icon="magnify"
-                              iconColor={pressed[i] ? "white" : "#534DB3"}
+                              iconColor="#534DB3"
                               containerColor="transparent"
                               size={20}
                               onPress={() => {
-                                setSelectedIndex(i); // ← add this
+                                setSelectedIndex(i);
                                 showDetails();
                               }}
                             />
                             <CIconButton
                               icon="trash-can-outline"
-                              iconColor={pressed[i] ? "white" : "#534DB3"}
+                              iconColor="#534DB3"
                               containerColor="transparent"
                               size={20}
                               onPress={() => {
-                                setEntryToDelete(e.id); // ← stocke le bon id
+                                setEntryToDelete(e.id);
                                 showDialog();
                               }}
                             />

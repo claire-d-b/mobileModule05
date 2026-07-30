@@ -2,7 +2,6 @@ import * as React from "react";
 import type { ReactNode, Dispatch, SetStateAction } from "react";
 import { BottomNavigation } from "react-native-paper";
 
-// Définis le type manuellement
 type Route = {
   key: string;
   title?: string;

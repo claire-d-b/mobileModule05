@@ -52,6 +52,28 @@ if [ ! -f "$ANDROID_HOME/platform-tools/adb" ]; then
 fi
 export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
 
+# ********* ngrok *********
+# if [ ! -f "$HOME/sgoinfre/ngrok/ngrok" ]; then
+# mkdir -p "$HOME/sgoinfre/ngrok"
+# NGROK_ARCH="$(uname -m)"
+# case "$NGROK_ARCH" in
+#   x86_64) NGROK_URL="https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz" ;;
+#   aarch64|arm64) NGROK_URL="https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz" ;;
+#   armv7l) NGROK_URL="https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz" ;;
+#   *) echo "Unsupported architecture for ngrok: $NGROK_ARCH"; exit 1 ;;
+# esac
+# curl -L "$NGROK_URL" -o "$HOME/sgoinfre/ngrok.tgz"
+# tar -xzf "$HOME/sgoinfre/ngrok.tgz" -C "$HOME/sgoinfre/ngrok"
+# rm "$HOME/sgoinfre/ngrok.tgz"
+# fi
+# export PATH="$HOME/sgoinfre/ngrok:$PATH"
+# ngrok version
+# npx ngrok authtoken TON_TOKEN_ICI
+export PATH="$HOME/sgoinfre/ngrok:$PATH"
+ngrok version
+ngrok config add-authtoken TON_TOKEN_ICI
+ngrok http 3000
+
 # ********* npm cache *********
 npm config set cache "$HOME/sgoinfre/.npm-cache"
 
