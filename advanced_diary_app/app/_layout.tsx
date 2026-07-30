@@ -1,12 +1,19 @@
 import { Stack } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { AuthProvider } from "../context/AuthContext";
+import { AuthProvider, useAuthContext } from "../context/AuthContext";
 import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import CLoading from "./CLoading";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const RootLayoutNav = () => {
+  const { loading } = useAuthContext();
+
+  if (loading) {
+    return <CLoading />;
+  }
+
   return <Stack screenOptions={{ headerShown: false }} />;
 };
 

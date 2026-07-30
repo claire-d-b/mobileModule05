@@ -122,7 +122,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
         console.error("Failed to delete entry:", data.error);
         return;
       }
-      console.log("✅ Entry deleted:", data.entry);
+      console.log("Entry deleted:", data.entry);
       await fetchEntries(0, login); // celui de Home, met à jour le state partagé
       fetchCount();
       fetchStats();
