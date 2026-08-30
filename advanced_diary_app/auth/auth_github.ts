@@ -2,6 +2,7 @@ import * as AuthSession from "expo-auth-session";
 import { useEffect } from "react";
 import { GithubAuthProvider, signInWithCredential } from "firebase/auth";
 import auth from "../config/firebase";
+// import { router } from "expo-router";
 
 // authorizationEndpoint — l'URL du navigateur qui s'ouvre quand l'utilisateur clique sur "Login with GitHub"
 // tokenEndpoint — l'URL pour échanger le code contre un access_token.
@@ -46,11 +47,14 @@ const useGithubAuth = () => {
         return;
       }
 
-      const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev/auth/github";
+      const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
       try {
-        const res = await fetch(backendUrl, {
+        const res = await fetch(`${backendUrl}/auth/github`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
           body: JSON.stringify({
             code,
             redirectUri,
@@ -75,6 +79,7 @@ const useGithubAuth = () => {
         await signInWithCredential(auth, credential);
 
         console.log("GitHub login success");
+        // router.replace("/home");
       } catch (e) {
         console.error("GitHub auth error:", e);
       }

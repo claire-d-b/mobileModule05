@@ -7,7 +7,7 @@ import Profile from "./Profile";
 import Agenda from "./Agenda";
 import Entries from "./Entries";
 
-const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 interface Entry {
   id: number;
@@ -37,6 +37,11 @@ const _ = () => {
     try {
       const res = await fetch(
         `${backendUrl}/entries/${encodeURIComponent(emailToUse)}?page=${pageNumber}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        },
       );
       const data = await res.json();
       if (!res.ok) return;

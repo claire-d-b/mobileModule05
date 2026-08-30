@@ -71,8 +71,11 @@ export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
 # npx ngrok authtoken TON_TOKEN_ICI
 export PATH="$HOME/sgoinfre/ngrok:$PATH"
 ngrok version
-ngrok config add-authtoken TON_TOKEN_ICI
-ngrok http 3000
+set -a
+source .env
+set +a
+
+ngrok config add-authtoken "$NGROK_AUTHTOKEN"
 
 # ********* npm cache *********
 npm config set cache "$HOME/sgoinfre/.npm-cache"

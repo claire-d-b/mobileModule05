@@ -16,7 +16,7 @@ interface Information {
   password: string;
 }
 
-const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +34,10 @@ const SignIn = () => {
     try {
       const res = await fetch(`${backendUrl}/user/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({ login, password }),
       });
       const data = await res.json();
@@ -53,12 +56,12 @@ const SignIn = () => {
         // Compte local => pas de Firebase
         await setLocalLogin(login);
         console.log("Backend registration success:", data.user);
-        router.replace("/home");
+        // router.replace("/home");
       } else {
         // Compte Google/GitHub => Firebase
         await signInWithEmailAndPassword(auth, login, password);
         setLogin("");
-        router.replace("/home");
+        // router.replace("/home");
       }
     } catch (e) {
       console.error("Error during login:", e);

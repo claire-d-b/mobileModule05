@@ -20,7 +20,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 interface Entry {
   id: number;
@@ -79,6 +79,11 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
     try {
       const res = await fetch(
         `${backendUrl}/entries/${encodeURIComponent(login)}/stats`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        },
       );
       const data = await res.json();
       setStats(data.stats ?? {});
@@ -94,6 +99,11 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
     try {
       const res = await fetch(
         `${backendUrl}/entries/${encodeURIComponent(login)}/count`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        },
       );
 
       const text = await res.text();
@@ -115,6 +125,9 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   const deleteEntry = async (id: number) => {
     try {
       const res = await fetch(`${backendUrl}/entries/${id}`, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
         method: "DELETE",
       });
       const data = await res.json();

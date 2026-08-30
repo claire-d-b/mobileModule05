@@ -18,7 +18,7 @@ const emotions = [
   "emoticon-angry",
 ];
 
-const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 interface Entry {
   id: number;
@@ -104,7 +104,10 @@ const _ = ({
     try {
       const res = await fetch(`${backendUrl}/entries`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({
           email,
           date: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
@@ -138,6 +141,9 @@ const _ = ({
   const deleteEntry = async (id: number) => {
     try {
       const res = await fetch(`${backendUrl}/entries/${id}`, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
         method: "DELETE",
       });
       const data = await res.json();

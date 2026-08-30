@@ -12,7 +12,7 @@ interface Information {
   npassword: string;
 }
 
-const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const Register = () => {
   const [login, setLogin] = useState("");
@@ -71,7 +71,10 @@ const Register = () => {
 
       const res = await fetch(`${backendUrl}/user/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({ login, password }),
       });
 

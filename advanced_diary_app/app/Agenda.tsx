@@ -7,7 +7,7 @@ import CDelete from "./CDelete";
 import CViewEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
 
-const backendUrl = "https://wooing-lurch-sift.ngrok-free.dev";
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const emotions = [
   "emoticon",
@@ -93,6 +93,11 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
     try {
       const res = await fetch(
         `${backendUrl}/entries/${encodeURIComponent(login)}/date/${dateStr}?page=${pageNumber}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        },
       );
       const data = await res.json();
       if (!res.ok) return;
@@ -109,6 +114,9 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   const deleteEntry = async (id: number) => {
     try {
       const res = await fetch(`${backendUrl}/entries/${id}`, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
         method: "DELETE",
       });
       const data = await res.json();
