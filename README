@@ -1,19 +1,52 @@
-bash
+MAKE SURE YOU LAUNCH COMMANDS FROM A TERMINAL AND NOT FLATHUB'S VSCODE
+3 terminals - front, back, and ngrok
 
-- Git clone in sgoinfre as mobileModule04
+- bash
+- Git clone in sgoinfre as mobileModule05
 - Access the repo with VSCode
 - Add 3 env files zith local data
-- Open 2 terminals
-- source ./startLinux.sh in both 2 terminals
-- npm i in diary_app and diary_app/backend
+- Open 3 terminals
+- chmod +x start.sh
+- ./start.sh
+- source ~/.bashrc
 
-in diary_app/backend : node reset-db.ts, node create-user.ts, node server.ts
-in diary_app :
+At project root:
 
-- npx expo install expo-dev-client
+# start pgsql
+- export PATH="$HOME/sgoinfre/pgsql/bin:$PATH"
+- psql -h localhost -p 5432 -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='claire'" | grep -q 1 \
+  || createuser -h localhost -p 5432 -U postgres --superuser claire
+- psql -h localhost -p 5432 -U postgres -lqt | cut -d '|' -f 1 | grep -qw advanced_diary_app \
+  || createdb -h localhost -p 5432 -U postgres -O claire advanced_diary_app
+- psql -h localhost -p 5432 -U claire -d advanced_diary_app -c "SELECT current_user;"
+- pg_ctl -D "$HOME/sgoinfre/pgsql_data" status > /dev/null 2>&1 || pg_ctl -D "$HOME/sgoinfre/pgsql_data" -l "$HOME/sgoinfre/pgsql_data/logfile.log" -o "-p 5432" start
+- pg_ctl -D "$HOME/sgoinfre/pgsql_data" status
+
+# start ngrok
+- export PATH="$HOME/.local/bin:$PATH"
+- . ou source "$HOME/sgoinfre/mobileModule05/.env" ***
+- ngrok config add-authtoken "$NGROK_AUTHTOKEN" ***
+- ngrok http 3000 ***
+
+# arreter Postgres et ngrok
+- pg_ctl -D "$HOME/sgoinfre/pgsql_data" stop
+- ngrok : Ctrl + C dans le terminal où il tourne.
+
+- npm i in advanced_diary_app and advanced_diary_app/backend
+
+# nettoyer et arreter le daemon gradle
+- cd "$HOME/sgoinfre/mobileModule05/advanced_diary_app/android" && ./gradlew --stop && cd ../../
+- rm -rf "$HOME/.gradle/caches"
+- pkill -f gradle
+- ps aux | grep java
+- kill -9 <PID>
+
+# Launch dev build to make native auth via Google & Github work
+- cd "$HOME/sgoinfre/mobileModule05/advanced_diary_app"
 - npx expo run:android
-- npx expo start --clear --tunnel
-  s - switch to development build for auth
+- npx expo start --dev-client --clear --tunnel
+in advanced_diary_app/backend : node reset-db.ts, node create-user.ts, node server.ts
+in advanced_diary_app :
 
 /!\ Make sure your device is connected to the same WiFi as your computer
 

@@ -30,7 +30,7 @@ const { Pool } = pg;
 const pool = new Pool({
   user: process.env.DB_USER || "claire",
   host: process.env.DB_HOST || "localhost",
-  database: process.env.DB_NAME || "diary_app",
+  database: process.env.DB_NAME || "advanced_diary_app",
   password: process.env.DB_PASSWORD || "",
   port: Number(process.env.DB_PORT) || 5432,
 });
@@ -83,7 +83,7 @@ app.post(
        RETURNING id, login, provider, created_at`,
         [login, hashedPassword],
       );
-      console.log("✅ User registered:", result.rows[0]);
+      console.log("User registered:", result.rows[0]);
       res.json({ message: "Registration success", user: result.rows[0] });
     } catch (e: any) {
       console.error(e);
@@ -127,7 +127,7 @@ app.post(
         user.id,
       ]);
 
-      console.log("✅ User logged in:", user.login);
+      console.log("User logged in:", user.login);
       res.json({
         message: "Login success",
         user: { id: user.id, login: user.login, provider: user.provider },

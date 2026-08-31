@@ -11,38 +11,73 @@ const pool = new Pool({
   port: Number(process.env.DB_PORT),
 });
 
+type Entry = {
+  date: string;
+  title: string;
+  feeling: number;
+  content: string;
+};
+
+const seedLocalUser = async (
+  login: string,
+  password: string,
+  entries: Entry[],
+): Promise<void> => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const userResult = await pool.query(
+    `INSERT INTO users (login, password, provider)
+     VALUES ($1, $2, 'local')
+     ON CONFLICT (login) DO UPDATE SET password = EXCLUDED.password
+     RETURNING id, login`,
+    [login, hashedPassword],
+  );
+  const user = userResult.rows[0];
+  console.log(`User created: ${user.login} (id: ${user.id})`);
+
+  for (const entry of entries) {
+    await pool.query(
+      `INSERT INTO diary_entries (user_id, date, title, feeling, content)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [user.id, entry.date, entry.title, entry.feeling, entry.content],
+    );
+  }
+
+  console.log(`${entries.length} diary entries inserted for ${login}`);
+};
+
+const seedGoogleUser = async (
+  login: string,
+  entries: Entry[],
+): Promise<void> => {
+  const userResult = await pool.query(
+    `INSERT INTO users (login, password, provider)
+     VALUES ($1, NULL, 'google')
+     ON CONFLICT (login) DO UPDATE SET provider = EXCLUDED.provider
+     RETURNING id, login`,
+    [login],
+  );
+  const user = userResult.rows[0];
+  console.log(`User created: ${user.login} (id: ${user.id})`);
+
+  for (const entry of entries) {
+    await pool.query(
+      `INSERT INTO diary_entries (user_id, date, title, feeling, content)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [user.id, entry.date, entry.title, entry.feeling, entry.content],
+    );
+  }
+
+  console.log(`${entries.length} diary entries inserted for ${login}`);
+};
+
 const seedTestUser = async (): Promise<void> => {
   try {
-    // --- Local user (email + password) ---
     const testPassword = process.env.TEST_USER_PASSWORD;
     if (!testPassword) throw new Error("Missing TEST_USER_PASSWORD in .env");
-    const hashedPassword = await bcrypt.hash(testPassword, 10);
 
-    const userResult = await pool.query(
-      `INSERT INTO users (login, password, provider)
-       VALUES ($1, $2, 'local')
-       ON CONFLICT (login) DO UPDATE SET password = EXCLUDED.password
-       RETURNING id, login`,
-      ["test_user", hashedPassword],
-    );
-    const localUser = userResult.rows[0];
-    console.log(`Local user created: ${localUser.login} (id: ${localUser.id})`);
-
-    // --- Google user (no local password) ---
-    const emailUserResult = await pool.query(
-      `INSERT INTO users (login, password, provider)
-       VALUES ($1, $2, 'google')
-       ON CONFLICT (login) DO UPDATE SET provider = EXCLUDED.provider
-       RETURNING id, login`,
-      ["sdiaryapp@gmail.com", null],
-    );
-    const googleUser = emailUserResult.rows[0];
-    console.log(
-      `Google user created: ${googleUser.login} (id: ${googleUser.id})`,
-    );
-
-    // --- Entries for local user ---
-    const localEntries = [
+    // --- Utilisateur 1 : test_user (local) ---
+    const testUserEntries: Entry[] = [
       // --- 10 entries on 2026-05-15 (pagination testing) ---
       {
         date: "2026-05-15",
@@ -179,82 +214,59 @@ const seedTestUser = async (): Promise<void> => {
         feeling: 3,
         content: "Post-holiday blues but the weather is nice. Could be worse.",
       },
-    ];
-
-    for (const entry of localEntries) {
-      await pool.query(
-        `INSERT INTO diary_entries (user_id, date, title, feeling, content)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [localUser.id, entry.date, entry.title, entry.feeling, entry.content],
-      );
-    }
-    console.log(
-      `${localEntries.length} diary entries inserted for ${localUser.login}`,
-    );
-
-    // --- Entries for Google user ---
-    const googleEntries = [
+      // --- A very very long entry ---
       {
         date: "2026-05-20",
-        title: "New login flow",
-        feeling: 4,
-        content: "Signed in with Google for the first time. Nice and smooth.",
-      },
-      {
-        date: "2026-05-22",
-        title: "First real entry",
+        title:
+          "A very long entry for testing - A very long entry for testing - A very long entry for testing - A very long entry for testing",
         feeling: 3,
         content:
-          "Trying this diary app out properly now. Curious to see how it goes.",
+          "I woke up this morning with no particular plan, which is rare for me, and I found myself just sitting by the window for almost half an hour, watching the light change as the sun came up over the rooftops across the street. There's something strange about days like this, days where nothing especially eventful happens, but where every small moment seems to stretch out and ask to be noticed. I made coffee, slower than usual, and I thought about how much of my life lately has been lived at a sprint, jumping from one task to the next without ever really landing anywhere. Today felt different. I spent the morning reading, actually reading, not skimming articles on my phone but sitting with an actual book for almost two hours, which I haven't done in longer than I'd like to admit. Around midday I went for a walk with no destination in mind, just to see where my feet would take me, and I ended up at a small park I'd never noticed before, tucked behind a row of buildings I must have passed a hundred times. There were kids playing some kind of game with chalk on the pavement, and an old man feeding pigeons from a bench, and for a while I just sat there and watched, not thinking about work or deadlines or any of the usual noise that fills my head. In the afternoon I called my sister, which I've been meaning to do for weeks, and we talked for almost an hour about nothing in particular — her new apartment, our parents, a show she's been watching — and it reminded me how easy it is to let relationships go quiet simply through inattention rather than any real falling out. By evening I cooked a proper meal instead of ordering something, and it took much longer than it needed to, but I didn't mind, there was something grounding about chopping vegetables and waiting for things to simmer rather than rushing toward the fastest possible outcome. I think what I'm trying to say, if I'm being honest with myself, is that today reminded me how much I've been running on autopilot lately, treating each day as a checklist to clear rather than something to actually experience. I don't know if I'll manage to hold onto this feeling tomorrow, or if by Monday I'll be back to rushing through everything without noticing much of it, but for tonight at least, I feel unusually present, and unusually at peace, and I wanted to write all of this down so that on some future rough day I can come back and remember that it's possible to slow down, even if just for one day, and that the slowing down itself was worth something.",
       },
+    ];
+
+    await seedLocalUser("test_user", testPassword, testUserEntries);
+
+    // --- Utilisateur 2 : sdiaryapp@gmail.com (Google) ---
+    const sdiaryEntries: Entry[] = [
       {
         date: "2026-06-01",
-        title: "Busy week ahead",
-        feeling: 2,
-        content: "Calendar is packed. Bracing myself.",
+        title: "Nouveau départ",
+        feeling: 4,
+        content:
+          "Premier jour avec ce nouveau compte. Envie de prendre l'habitude d'écrire régulièrement.",
       },
       {
-        date: "2026-06-10",
-        title: "Nice surprise",
-        feeling: 5,
-        content: "Old friend reached out out of nowhere. Made my day.",
+        date: "2026-06-05",
+        title: "Journée productive",
+        feeling: 4,
+        content:
+          "Beaucoup avancé sur mes projets aujourd'hui. Satisfaite du rythme.",
+      },
+      {
+        date: "2026-06-12",
+        title: "Petit coup de mou",
+        feeling: 2,
+        content:
+          "Fatiguée toute la journée, difficile de me concentrer sur quoi que ce soit.",
       },
       {
         date: "2026-06-18",
-        title: "Quiet Sunday",
-        feeling: 4,
-        content: "Did nothing productive and it was exactly what I needed.",
+        title: "Sortie improvisée",
+        feeling: 5,
+        content:
+          "Balade au bord de l'eau avec des amis, on ne l'avait pas prévu et c'était parfait.",
       },
       {
         date: "2026-06-25",
-        title: "Small win",
-        feeling: 4,
-        content: "Finally fixed that flaky test. Weirdly satisfying.",
-      },
-      {
-        date: "2026-07-02",
-        title: "Overwhelmed",
-        feeling: 1,
-        content: "Too many things at once today. Need to slow down tomorrow.",
-      },
-      {
-        date: "2026-07-10",
-        title: "Good news",
-        feeling: 5,
-        content: "Got some news that made the whole week feel worth it.",
+        title: "Réflexion du soir",
+        feeling: 3,
+        content:
+          "Journée calme, sans grand relief, mais agréable. Besoin de ce genre de pause.",
       },
     ];
 
-    for (const entry of googleEntries) {
-      await pool.query(
-        `INSERT INTO diary_entries (user_id, date, title, feeling, content)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [googleUser.id, entry.date, entry.title, entry.feeling, entry.content],
-      );
-    }
-    console.log(
-      `${googleEntries.length} diary entries inserted for ${googleUser.login}`,
-    );
+    await seedGoogleUser("sdiaryapp@gmail.com", sdiaryEntries);
   } catch (e) {
     console.error("Seeding failed:", e);
   } finally {
