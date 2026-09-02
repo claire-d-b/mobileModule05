@@ -1,6 +1,6 @@
 import { View, useWindowDimensions, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
-import { auth } from "firebase/auth";
+import auth from "../config/firebase";
 import { Text } from "react-native-paper";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";

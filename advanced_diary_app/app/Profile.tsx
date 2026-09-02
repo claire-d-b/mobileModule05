@@ -1,6 +1,6 @@
 import { View, useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
-import { auth } from "./firebase/auth";
+import auth from "../config/firebase";
 import { useAuthContext } from "../context/AuthContext";
 import { Text } from "react-native-paper";
 import { router } from "expo-router";

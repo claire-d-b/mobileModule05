@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { auth, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import auth from "../config/firebase";
 import { useAuthContext } from "../context/AuthContext";
 import CBottomNav from "./CBottomNav";
 import * as React from "react";
