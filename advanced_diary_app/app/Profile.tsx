@@ -1,6 +1,6 @@
 import { View, useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
+import { auth } from "./firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
 import { Text } from "react-native-paper";
 import { router } from "expo-router";
@@ -151,7 +151,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
       console.warn("Google sign-out failed:", e);
     }
     try {
-      await getAuth().signOut();
+      await auth.signOut();
     } catch (_) {}
     await setLocalLogin(null);
     router.replace("/signin");

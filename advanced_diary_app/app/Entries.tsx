@@ -1,6 +1,6 @@
 import { View, useWindowDimensions, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
+import { auth } from "firebase/auth";
 import { Text } from "react-native-paper";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";
@@ -88,7 +88,6 @@ const _ = ({
     borderRadius: 10,
   };
 
-  const auth = getAuth();
   const [email, setEmail] = useState<string | null>(login ?? null);
 
   const handleSubmit = async () => {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { auth, onAuthStateChanged } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
 import CBottomNav from "./CBottomNav";
 import * as React from "react";
@@ -56,7 +56,6 @@ const _ = () => {
   };
 
   useEffect(() => {
-    const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       const resolvedEmail = user?.email ?? localLogin ?? null;
       setEmail(resolvedEmail);

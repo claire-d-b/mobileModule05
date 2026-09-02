@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { auth, onAuthStateChanged } from "firebase/auth";
 
 interface AuthContextType {
   localLogin: string | null;
@@ -33,12 +33,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Then let Firebase's auth state override/confirm as needed
-      const auth = getAuth();
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (!isMounted) return;
 
         if (user?.email) {
-          console.log("🔥 Firebase user detected:", user.email);
+          console.log("Firebase user detected:", user.email);
           setLocalLoginState(user.email);
           await AsyncStorage.setItem("localLogin", user.email);
         }
