@@ -1,7 +1,6 @@
 import * as AuthSession from "expo-auth-session";
 import { useEffect } from "react";
-import { GithubAuthProvider, signInWithCredential } from "firebase/auth";
-import auth from "../config/firebase";
+import { useAuthContext } from "../context/AuthContext";
 // import { router } from "expo-router";
 
 // authorizationEndpoint — l'URL du navigateur qui s'ouvre quand l'utilisateur clique sur "Login with GitHub"
@@ -17,6 +16,8 @@ const discovery = {
 
 // url de redirection de github après le login
 const useGithubAuth = () => {
+  const { setSession } = useAuthContext();
+
   const redirectUri = AuthSession.makeRedirectUri({
     scheme: "com.anonymous.diaryapp", // must match app.json
   });
@@ -69,16 +70,15 @@ const useGithubAuth = () => {
 
         const data = await res.json();
 
-        if (!data.access_token) {
-          console.error("No access token returned");
+        if (!data.token || !data.user) {
+          console.error("Missing token or user in backend response");
           return;
         }
 
-        // Utilise le token GitHub pour créer une session Firebase — l'utilisateur est maintenant connecté.
-        const credential = GithubAuthProvider.credential(data.access_token);
-        await signInWithCredential(auth, credential);
+        // Le backend a vérifié le code GitHub et renvoyé un JWT — on l'enregistre comme session.
+        await setSession(data.token, data.user.login);
 
-        console.log("GitHub login success");
+        console.log("GitHub login success:", data.user.login);
         // router.replace("/home");
       } catch (e) {
         console.error("GitHub auth error:", e);

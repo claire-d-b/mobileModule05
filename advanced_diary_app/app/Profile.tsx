@@ -1,6 +1,5 @@
 import { View, useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
-import auth from "../config/firebase";
 import { useAuthContext } from "../context/AuthContext";
 import { Text } from "react-native-paper";
 import { router } from "expo-router";
@@ -55,7 +54,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
   const showDetails = () => setDetails(true);
 
-  const { localLogin, setLocalLogin } = useAuthContext();
+  const { localLogin, token, setSession } = useAuthContext();
 
   const [totalNbOfEntries, setTotalNbOfEntries] = useState(0);
 
@@ -75,13 +74,14 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   const [stats, setStats] = useState<Stats>({});
 
   const fetchStats = async () => {
-    if (!login) return;
+    if (!login || !token) return;
     try {
       const res = await fetch(
         `${backendUrl}/entries/${encodeURIComponent(login)}/stats`,
         {
           headers: {
             "ngrok-skip-browser-warning": "true",
+            Authorization: `Bearer ${token}`,
           },
         },
       );
@@ -94,7 +94,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
 
   const fetchCount = async () => {
-    if (!login) return;
+    if (!login || !token) return;
 
     try {
       const res = await fetch(
@@ -102,6 +102,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
         {
           headers: {
             "ngrok-skip-browser-warning": "true",
+            Authorization: `Bearer ${token}`,
           },
         },
       );
@@ -123,10 +124,12 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
 
   const deleteEntry = async (id: number) => {
+    if (!token) return;
     try {
       const res = await fetch(`${backendUrl}/entries/${id}`, {
         headers: {
           "ngrok-skip-browser-warning": "true",
+          Authorization: `Bearer ${token}`,
         },
         method: "DELETE",
       });
@@ -145,33 +148,34 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
 
   const logout = async () => {
+    // Révoque uniquement la session côté Google si le hook l'expose (déconnexion du compte Google local à l'appareil)
     try {
-      await signOutGoogle();
+      await signOutGoogle?.();
     } catch (e) {
       console.warn("Google sign-out failed:", e);
     }
-    try {
-      await auth.signOut();
-    } catch (_) {}
-    await setLocalLogin(null);
+    // Session applicative : uniquement gérée par notre backend/JWT désormais
+    await setSession(null, null);
     router.replace("/signin");
   };
 
   useEffect(() => {
     if (!login) return;
     if (!localLogin) router.replace("/signin");
+    if (!token) return;
     fetchCount();
     fetchStats();
-  }, [localLogin, login, entries]);
+  }, [localLogin, login, token, entries]);
 
   useEffect(() => {
     if (!login) return;
     if (!localLogin) router.replace("/signin");
+    if (!token) return;
 
     fetchCount();
     fetchEntries(0, login);
     fetchStats();
-  }, [localLogin, login]);
+  }, [localLogin, login, token]);
 
   return (
     <View

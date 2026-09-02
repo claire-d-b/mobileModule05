@@ -1,75 +1,55 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { onAuthStateChanged } from "firebase/auth";
-import auth from "../config/firebase";
 
 interface AuthContextType {
+  token: string | null;
   localLogin: string | null;
-  setLocalLogin: (login: string | null) => Promise<void>;
+  setSession: (token: string | null, login: string | null) => Promise<void>;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
+  token: null,
   localLogin: null,
-  setLocalLogin: async () => {},
+  setSession: async () => {},
   loading: true,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [localLogin, setLocalLoginState] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [localLogin, setLocalLogin] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const init = async () => {
-      // Try to restore a previously saved local login immediately
+    const restore = async () => {
       try {
+        const storedToken = await AsyncStorage.getItem("token");
         const storedLogin = await AsyncStorage.getItem("localLogin");
-        if (isMounted && storedLogin) {
-          setLocalLoginState(storedLogin);
-        }
+        if (storedToken) setToken(storedToken);
+        if (storedLogin) setLocalLogin(storedLogin);
       } catch (e) {
-        console.warn("Failed to read localLogin from storage", e);
-      }
-
-      // Then let Firebase's auth state override/confirm as needed
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (!isMounted) return;
-
-        if (user?.email) {
-          console.log("Firebase user detected:", user.email);
-          setLocalLoginState(user.email);
-          await AsyncStorage.setItem("localLogin", user.email);
-        }
-        // Not clearing localLogin here if user is null, since we want to keep the local/manual login as a fallback.
-
+        console.warn("Failed to restore session", e);
+      } finally {
         setLoading(false);
-      });
-
-      return unsubscribe;
+      }
     };
-
-    const unsubscribePromise = init();
-
-    return () => {
-      isMounted = false;
-      unsubscribePromise.then((unsub) => unsub && unsub());
-    };
+    restore();
   }, []);
 
-  const setLocalLogin = async (login: string | null) => {
-    setLocalLoginState(login);
-
-    if (login) {
+  const setSession = async (newToken: string | null, login: string | null) => {
+    setToken(newToken);
+    setLocalLogin(login);
+    if (newToken && login) {
+      await AsyncStorage.setItem("token", newToken);
       await AsyncStorage.setItem("localLogin", login);
     } else {
+      await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("localLogin");
     }
   };
 
   return (
-    <AuthContext.Provider value={{ localLogin, setLocalLogin, loading }}>
+    <AuthContext.Provider value={{ token, localLogin, setSession, loading }}>
       {children}
     </AuthContext.Provider>
   );

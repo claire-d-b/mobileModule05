@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import auth from "../config/firebase";
 import { useAuthContext } from "../context/AuthContext";
 import CBottomNav from "./CBottomNav";
 import * as React from "react";
@@ -20,7 +18,7 @@ interface Entry {
 }
 
 const _ = () => {
-  const { localLogin } = useAuthContext();
+  const { localLogin, token } = useAuthContext();
   const [email, setEmail] = useState<string | null>(localLogin ?? null);
 
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -33,7 +31,7 @@ const _ = () => {
     resolvedEmail?: string | null,
   ) => {
     const emailToUse = resolvedEmail ?? email;
-    if (!emailToUse) return;
+    if (!emailToUse || !token) return;
 
     try {
       const res = await fetch(
@@ -41,6 +39,7 @@ const _ = () => {
         {
           headers: {
             "ngrok-skip-browser-warning": "true",
+            Authorization: `Bearer ${token}`,
           },
         },
       );
@@ -56,17 +55,14 @@ const _ = () => {
     }
   };
 
+  // L'email affiché suit désormais uniquement le login local (issu du JWT/backend custom), plus de source Firebase
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const resolvedEmail = user?.email ?? localLogin ?? null;
-      setEmail(resolvedEmail);
-    });
-    return () => unsubscribe();
+    setEmail(localLogin ?? null);
   }, [localLogin]);
 
   useEffect(() => {
-    if (email) fetchEntries(page, email);
-  }, [email]);
+    if (email && token) fetchEntries(page, email);
+  }, [email, token]);
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([

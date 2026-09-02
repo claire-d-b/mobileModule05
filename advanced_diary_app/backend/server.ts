@@ -1,20 +1,22 @@
 import express from "express";
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import cors from "cors";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
 const app = express();
 
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is not defined in environment variables");
+}
+
 app.get("/", (req, res) => {
   res.send("Backend works");
-});
-
-app.listen(3000, "0.0.0.0", () => {
-  console.log("Server running on 3000");
 });
 
 // Middlewares Express avant les routes
@@ -70,6 +72,44 @@ interface GoogleProfile {
   email: string;
 }
 
+interface JwtPayload {
+  id: number;
+  login: string;
+}
+
+// Étend Request pour porter l'utilisateur authentifié une fois le token vérifié
+interface AuthRequest<P = {}, ResBody = any, ReqBody = any> extends Request<
+  P,
+  ResBody,
+  ReqBody
+> {
+  userId?: number;
+  userLogin?: string;
+}
+
+function signToken(payload: JwtPayload): string {
+  return jwt.sign(payload, JWT_SECRET as string, { expiresIn: "30d" });
+}
+
+// Middleware : vérifie le header "Authorization: Bearer <token>" et attache userId/userLogin à la requête
+function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Missing or malformed token" });
+  }
+
+  const token = header.split(" ")[1];
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET as string) as JwtPayload;
+    req.userId = payload.id;
+    req.userLogin = payload.login;
+    next();
+  } catch (e) {
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
+}
+
 // REGISTER USER
 app.post(
   "/user/register",
@@ -83,8 +123,11 @@ app.post(
        RETURNING id, login, provider, created_at`,
         [login, hashedPassword],
       );
-      console.log("User registered:", result.rows[0]);
-      res.json({ message: "Registration success", user: result.rows[0] });
+      const user = result.rows[0];
+      const token = signToken({ id: user.id, login: user.login });
+
+      console.log("User registered:", user);
+      res.json({ message: "Registration success", user, token });
     } catch (e: any) {
       console.error(e);
       // 23505 est le code d'erreur PostgreSQL pour une violation de contrainte unique
@@ -127,10 +170,13 @@ app.post(
         user.id,
       ]);
 
+      const token = signToken({ id: user.id, login: user.login });
+
       console.log("User logged in:", user.login);
       res.json({
         message: "Login success",
         user: { id: user.id, login: user.login, provider: user.provider },
+        token,
       });
     } catch (e) {
       console.error(e);
@@ -188,9 +234,12 @@ app.post(
         [login, String(profile.id)],
       );
 
-      console.log("GitHub user upserted:", result.rows[0]);
+      const user = result.rows[0];
+      const token = signToken({ id: user.id, login: user.login });
+
+      console.log("GitHub user upserted:", user);
       // result.rows[0] -> la première — et seule — ligne renvoyée par le RETURNING de la requête SQL juste avant)
-      res.json({ access_token: data.access_token, user: result.rows[0] });
+      res.json({ user, token });
     } catch (e) {
       console.error("GitHub auth error:", e);
       res.status(500).json({ error: "GitHub auth failed" });
@@ -202,12 +251,12 @@ app.post(
 app.post(
   "/auth/google",
   async (req: Request<{}, {}, GoogleAuthBody>, res: Response) => {
-    const { token } = req.body;
+    const { token: googleAccessToken } = req.body;
     try {
       const profile = (await fetch(
         "https://www.googleapis.com/oauth2/v3/userinfo",
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${googleAccessToken}` },
         },
       ).then((r) => r.json())) as GoogleProfile;
       console.log("Google profile:", profile);
@@ -227,8 +276,11 @@ app.post(
         [profile.email, String(profile.sub)],
       ); // Concrètement, sub est l'identifiant unique et permanent de ce compte Google — un numéro qui ne change jamais, propre à ce compte utilisateur spécifique.
 
-      console.log("Google user upserted:", result.rows[0]);
-      res.json({ user: result.rows[0] });
+      const user = result.rows[0];
+      const token = signToken({ id: user.id, login: user.login });
+
+      console.log("Google user upserted:", user);
+      res.json({ user, token });
     } catch (e) {
       console.error("Google auth error:", e);
       res.status(500).json({ error: "Google auth failed" });
@@ -239,16 +291,12 @@ app.post(
 // CREATE DIARY ENTRY
 app.post(
   "/entries",
-  async (req: Request<{}, {}, DiaryEntryBody>, res: Response) => {
-    const { email, date, title, feeling, content } = req.body;
+  requireAuth,
+  async (req: AuthRequest<{}, {}, DiaryEntryBody>, res: Response) => {
+    const { date, title, feeling, content } = req.body;
     try {
-      const userResult = await pool.query(
-        "SELECT id FROM users WHERE login = $1",
-        [email],
-      );
-      if (userResult.rows.length === 0)
-        return res.status(404).json({ error: "User not found" });
-      const user_id: number = userResult.rows[0].id;
+      // On utilise l'utilisateur authentifié (req.userId), pas un email envoyé par le client
+      const user_id = req.userId!;
       const result = await pool.query(
         `INSERT INTO diary_entries (user_id, date, title, feeling, content)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
@@ -263,46 +311,61 @@ app.post(
 );
 
 // GET ENTRIES FOR USER
-app.get("/entries/:email", async (req, res) => {
-  const { email } = req.params;
-  const page = Number(req.query.page ?? 0);
-  const limit = 6;
-  const offset = page * limit;
+app.get(
+  "/entries/:email",
+  requireAuth,
+  async (req: AuthRequest<{ email: string }>, res: Response) => {
+    const { email } = req.params;
 
-  try {
-    const countResult = await pool.query(
-      `SELECT COUNT(*) FROM diary_entries e
+    // Un utilisateur ne peut lire que ses propres entrées
+    if (req.userLogin !== email) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    const page = Number(req.query.page ?? 0);
+    const limit = 6;
+    const offset = page * limit;
+
+    try {
+      const countResult = await pool.query(
+        `SELECT COUNT(*) FROM diary_entries e
        JOIN users u ON e.user_id = u.id
        WHERE u.login = $1`,
-      [email],
-    );
-    const total = Number(countResult.rows[0].count);
-    // offset : combien d'entrées "sauter" avant de commencer à lire (page 0 → offset 0, page 1 → offset 6, page 2 → offset 12...).
-    // e and u aliases for diary entries and users
-    const result = await pool.query(
-      `SELECT e.* FROM diary_entries e
+        [email],
+      );
+      const total = Number(countResult.rows[0].count);
+      // offset : combien d'entrées "sauter" avant de commencer à lire (page 0 → offset 0, page 1 → offset 6, page 2 → offset 12...).
+      // e and u aliases for diary entries and users
+      const result = await pool.query(
+        `SELECT e.* FROM diary_entries e
        JOIN users u ON e.user_id = u.id
        WHERE u.login = $1
        ORDER BY updated_at DESC
        LIMIT $2 OFFSET $3`,
-      [email, limit, offset],
-    );
+        [email, limit, offset],
+      );
 
-    res.json({
-      entries: result.rows,
-      hasNext: offset + limit < total,
-      hasPrev: page > 0,
-    });
-  } catch {
-    res.status(500).json({ error: "Failed to fetch entries" });
-  }
-});
+      res.json({
+        entries: result.rows,
+        hasNext: offset + limit < total,
+        hasPrev: page > 0,
+      });
+    } catch {
+      res.status(500).json({ error: "Failed to fetch entries" });
+    }
+  },
+);
 
 // GET COUNT OF ENTRIES FOR USER
 app.get(
   "/entries/:login/count",
-  async (req: Request<{ login: string }>, res: Response) => {
+  requireAuth,
+  async (req: AuthRequest<{ login: string }>, res: Response) => {
     const { login } = req.params;
+
+    if (req.userLogin !== login) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
 
     try {
       const result = await pool.query(
@@ -324,8 +387,14 @@ app.get(
 // GET FEELING STATS FOR USER
 app.get(
   "/entries/:email/stats",
-  async (req: Request<{ email: string }>, res: Response) => {
+  requireAuth,
+  async (req: AuthRequest<{ email: string }>, res: Response) => {
     const { email } = req.params;
+
+    if (req.userLogin !== email) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     try {
       const result = await pool.query(
         `SELECT feeling, COUNT(*) as count
@@ -365,12 +434,14 @@ app.get(
 // DELETE DIARY ENTRY
 app.delete(
   "/entries/:id",
-  async (req: Request<{ id: string }>, res: Response) => {
+  requireAuth,
+  async (req: AuthRequest<{ id: string }>, res: Response) => {
     const { id } = req.params;
     try {
+      // On vérifie que l'entrée appartient bien à l'utilisateur authentifié avant de supprimer
       const result = await pool.query(
-        "DELETE FROM diary_entries WHERE id = $1 RETURNING *", // returns all columns in deleted entry, not just id
-        [id],
+        "DELETE FROM diary_entries WHERE id = $1 AND user_id = $2 RETURNING *",
+        [id, req.userId],
       );
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "Entry not found" });
@@ -387,8 +458,14 @@ app.delete(
 // GET ENTRIES FOR USER BY DATE
 app.get(
   "/entries/:email/date/:date",
-  async (req: Request<{ email: string; date: string }>, res: Response) => {
+  requireAuth,
+  async (req: AuthRequest<{ email: string; date: string }>, res: Response) => {
     const { email, date } = req.params;
+
+    if (req.userLogin !== email) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     const page = Number(req.query.page ?? 0);
     const limit = 4;
     const offset = page * limit;
@@ -426,3 +503,7 @@ app.get(
     }
   },
 );
+
+app.listen(3000, "0.0.0.0", () => {
+  console.log("Server running on 3000");
+});

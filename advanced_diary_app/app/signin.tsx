@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import { TextInput } from "react-native-paper";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext";
 import { router } from "expo-router";
-import auth from "../config/firebase";
 import useGoogleAuth from "../auth/auth_google";
 import useGithubAuth from "../auth/auth_github";
 import CTextInput from "./CTextInput";
@@ -27,7 +25,8 @@ const SignIn = () => {
 
   const { promptAsync: googlePrompt, request: googleRequest } = useGoogleAuth();
   const { promptAsync: githubPrompt, request: githubRequest } = useGithubAuth();
-  const { setLocalLogin } = useAuthContext(); // ← ajoute ça
+  const { setSession } = useAuthContext();
+
   const handleSubmit = async ({ login, password }: Information) => {
     setError("");
     setIsLoading(true);
@@ -49,20 +48,19 @@ const SignIn = () => {
         return;
       }
 
-      const provider = data.user?.provider;
-      console.log("Backend login success, provider:", provider);
-
-      if (provider === "local") {
-        // Compte local => pas de Firebase
-        await setLocalLogin(login);
-        console.log("Backend registration success:", data.user);
-        // router.replace("/home");
-      } else {
-        // Compte Google/GitHub => Firebase
-        await signInWithEmailAndPassword(auth, login, password);
-        setLogin("");
-        // router.replace("/home");
+      if (!data.token || !data.user) {
+        setError("Unexpected server response");
+        console.error("Missing token or user in backend response");
+        setIsLoading(false);
+        return;
       }
+
+      // Le backend est désormais la seule source de vérité, quel que soit le provider (local, Google, GitHub)
+      console.log("Login success:", data.user);
+      await setSession(data.token, data.user.login);
+      setLogin("");
+      setPassword("");
+      router.replace("/home" as any);
     } catch (e) {
       console.error("Error during login:", e);
       setError("An error occurred");

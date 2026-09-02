@@ -1,6 +1,5 @@
 import { View, useWindowDimensions, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
-import auth from "../config/firebase";
 import { Text } from "react-native-paper";
 import CIconButton from "./CIconButton";
 import CChip from "./CChip";
@@ -9,6 +8,7 @@ import CDelete from "./CDelete";
 import CViewEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
 import CButton from "./CButton";
+import { useAuthContext } from "../context/AuthContext";
 
 const emotions = [
   "emoticon",
@@ -57,6 +57,7 @@ const _ = ({
   hasPrev,
   fetchEntries,
 }: Props) => {
+  const { token } = useAuthContext();
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
@@ -97,8 +98,11 @@ const _ = ({
       setType("error");
       return;
     }
-    console.log("auth.currentUser:", auth.currentUser?.email);
-    console.log("email utilisé:", email);
+    if (!token) {
+      setMessage("You must be logged in to add an entry.");
+      setType("error");
+      return;
+    }
 
     try {
       const res = await fetch(`${backendUrl}/entries`, {
@@ -106,9 +110,9 @@ const _ = ({
         headers: {
           "Content-Type": "application/json",
           "ngrok-skip-browser-warning": "true",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          email,
           date: new Date().toLocaleDateString("en-CA"), // YYYY-MM-DD
           title,
           feeling,
@@ -120,6 +124,8 @@ const _ = ({
 
       if (!res.ok) {
         console.error("Failed to create entry:", data.error);
+        setMessage(data.error ?? "Failed to create entry.");
+        setType("error");
         return;
       }
 
@@ -138,10 +144,12 @@ const _ = ({
   };
 
   const deleteEntry = async (id: number) => {
+    if (!token) return;
     try {
       const res = await fetch(`${backendUrl}/entries/${id}`, {
         headers: {
           "ngrok-skip-browser-warning": "true",
+          Authorization: `Bearer ${token}`,
         },
         method: "DELETE",
       });
@@ -182,11 +190,11 @@ const _ = ({
   };
 
   useEffect(() => {
-    if (!login) return;
+    if (!login || !token) return;
     setEmail(login ?? null);
     fetchEntries(0, login);
     setPage(0);
-  }, [login]);
+  }, [login, token]);
 
   const selectedEntry = selectedIndex !== null ? entries[selectedIndex] : null;
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);

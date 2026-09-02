@@ -6,6 +6,7 @@ import CCalendar from "./CCalendar";
 import CDelete from "./CDelete";
 import CViewEntry from "./CViewEntry";
 import { formatDate } from "../utils/utils";
+import { useAuthContext } from "../context/AuthContext";
 
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -33,6 +34,7 @@ interface Props {
 }
 
 const _ = ({ login, entries, fetchEntries }: Props) => {
+  const { token } = useAuthContext();
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
@@ -83,7 +85,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
 
   const fetchEntriesByDate = async (selectedDate: Date, pageNumber = 0) => {
-    if (!login) return;
+    if (!login || !token) return;
     const dateStr = new Date(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
@@ -96,6 +98,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
         {
           headers: {
             "ngrok-skip-browser-warning": "true",
+            Authorization: `Bearer ${token}`,
           },
         },
       );
@@ -112,10 +115,12 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
 
   const deleteEntry = async (id: number) => {
+    if (!token) return;
     try {
       const res = await fetch(`${backendUrl}/entries/${id}`, {
         headers: {
           "ngrok-skip-browser-warning": "true",
+          Authorization: `Bearer ${token}`,
         },
         method: "DELETE",
       });
@@ -133,7 +138,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
 
   useEffect(() => {
     fetchEntriesByDate(date, page);
-  }, [date]);
+  }, [date, token]);
 
   return (
     <View style={{ width: "100%", flex: 1 }}>

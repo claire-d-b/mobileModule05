@@ -21,7 +21,7 @@ const Register = () => {
   const [secure, setSecure] = useState(true);
   const [nsecure, setNSecure] = useState(true);
   const [error, setError] = useState("");
-  const { setLocalLogin } = useAuthContext();
+  const { setSession } = useAuthContext();
 
   const isCorrectPassword = (password: string) => {
     const hasUppercase = (str: string): boolean => /[A-Z]/.test(str);
@@ -67,7 +67,7 @@ const Register = () => {
     }
 
     try {
-      console.log("📡 calling:", `${backendUrl}/user/register`);
+      console.log("calling:", `${backendUrl}/user/register`);
 
       const res = await fetch(`${backendUrl}/user/register`, {
         method: "POST",
@@ -96,8 +96,14 @@ const Register = () => {
         return;
       }
 
+      if (!data.token || !data.user) {
+        setError("Unexpected server response");
+        console.error("Missing token or user in backend response");
+        return;
+      }
+
       console.log("Registration success:", data.user);
-      await setLocalLogin(login);
+      await setSession(data.token, data.user.login);
       router.replace("/home" as any);
     } catch (e: any) {
       console.error("Network error:", e);
