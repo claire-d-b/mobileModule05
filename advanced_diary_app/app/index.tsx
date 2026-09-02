@@ -1,12 +1,12 @@
-import Signin from "./signin";
-import Home from "./home";
-import CLoading from "./CLoading";
+import { Redirect } from "expo-router";
+import CLoading from "../components/CLoading";
 import { useAuthContext } from "../context/AuthContext";
 
-const _ = () => {
-  const { localLogin, loading } = useAuthContext();
+export default function Index() {
+  const { token, loading } = useAuthContext();
+  console.log("INDEX RENDER:", { hasToken: !!token, loading });
 
-  return loading ? <CLoading /> : localLogin ? <Home /> : <Signin />;
-};
+  if (loading) return <CLoading />;
 
-export default _;
+  return <Redirect href={token ? "/home" : "/signin"} />;
+}

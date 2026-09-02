@@ -5,9 +5,9 @@ import { useAuthContext } from "../context/AuthContext";
 import { router } from "expo-router";
 import useGoogleAuth from "../auth/auth_google";
 import useGithubAuth from "../auth/auth_github";
-import CTextInput from "./CTextInput";
-import CButton from "./CButton";
-import CLoading from "./CLoading";
+import CTextInput from "../components/CTextInput";
+import CButton from "../components/CButton";
+import CLoading from "../components/CLoading";
 
 interface Information {
   login: string;
@@ -23,8 +23,16 @@ const SignIn = () => {
   const [secure, setSecure] = useState(true);
   const [error, setError] = useState("");
 
-  const { promptAsync: googlePrompt, request: googleRequest } = useGoogleAuth();
-  const { promptAsync: githubPrompt, request: githubRequest } = useGithubAuth();
+  const {
+    promptAsync: googlePrompt,
+    request: googleRequest,
+    isSigningIn: isGoogleSigningIn, // si tu ajoutes le même pattern à useGoogleAuth
+  } = useGoogleAuth();
+  const {
+    promptAsync: githubPrompt,
+    request: githubRequest,
+    isSigningIn: isGithubSigningIn,
+  } = useGithubAuth();
   const { setSession } = useAuthContext();
 
   const handleSubmit = async ({ login, password }: Information) => {
@@ -44,30 +52,31 @@ const SignIn = () => {
       if (!res.ok) {
         setError(data.error || "Login failed");
         console.error("Login failed:", data.error);
-        setIsLoading(false); // cache loading si erreur
+        setIsLoading(false); // erreur → on réaffiche le formulaire
         return;
       }
 
       if (!data.token || !data.user) {
         setError("Unexpected server response");
         console.error("Missing token or user in backend response");
-        setIsLoading(false);
+        setIsLoading(false); // erreur → on réaffiche le formulaire
         return;
       }
 
-      // Le backend est désormais la seule source de vérité, quel que soit le provider (local, Google, GitHub)
       console.log("Login success:", data.user);
       await setSession(data.token, data.user.login);
       setLogin("");
       setPassword("");
       router.replace("/home" as any);
+      // pas de setIsLoading(false) — succès → on laisse CLoading affiché
+      // jusqu'à ce que la navigation démonte ce composant
     } catch (e) {
       console.error("Error during login:", e);
       setError("An error occurred");
-      setIsLoading(false); // cache loading si erreur
+      setIsLoading(false); // erreur → on réaffiche le formulaire
     }
   };
-  if (isLoading) return <CLoading />;
+  if (isLoading || isGithubSigningIn || isGoogleSigningIn) return <CLoading />;
 
   return (
     <View

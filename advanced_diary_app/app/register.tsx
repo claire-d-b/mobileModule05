@@ -3,8 +3,8 @@ import { View, Text } from "react-native";
 import { TextInput } from "react-native-paper";
 import { router } from "expo-router";
 import { useAuthContext } from "../context/AuthContext";
-import CTextInput from "./CTextInput";
-import CButton from "./CButton";
+import CTextInput from "../components/CTextInput";
+import CButton from "../components/CButton";
 
 interface Information {
   login: string;
@@ -104,7 +104,7 @@ const Register = () => {
 
       console.log("Registration success:", data.user);
       await setSession(data.token, data.user.login);
-      router.replace("/home" as any);
+      // router.replace("/home" as any);
     } catch (e: any) {
       console.error("Network error:", e);
       setError("Network error — backend running?");

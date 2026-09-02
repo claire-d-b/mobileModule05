@@ -1,25 +1,21 @@
 import * as AuthSession from "expo-auth-session";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
-// import { router } from "expo-router";
-
-// authorizationEndpoint — l'URL du navigateur qui s'ouvre quand l'utilisateur clique sur "Login with GitHub"
-// tokenEndpoint — l'URL pour échanger le code contre un access_token.
-// En résumé : discovery est la carte routière d'OAuth — il dit à AuthSession :
-// - où envoyer l'utilisateur pour se connecter
-// - où aller ensuite pour récupérer le token
+import { router } from "expo-router";
 
 const discovery = {
   authorizationEndpoint: "https://github.com/login/oauth/authorize",
   tokenEndpoint: "https://github.com/login/oauth/access_token",
 };
 
-// url de redirection de github après le login
 const useGithubAuth = () => {
   const { setSession } = useAuthContext();
+  // true dès que le navigateur OAuth renvoie une réponse "success",
+  // jusqu'à ce que le backend ait répondu et la session soit posée.
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   const redirectUri = AuthSession.makeRedirectUri({
-    scheme: "com.anonymous.diaryapp", // must match app.json
+    scheme: "com.anonymous.diaryapp",
   });
 
   const clientId = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID;
@@ -28,10 +24,9 @@ const useGithubAuth = () => {
 
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
-      clientId, // GitHub OAuth App ID
-      scopes: ["read:user", "user:email"], // ce qu'on demande comme permissions
-      redirectUri, // où GitHub redirige après login
-      // PKCE (Proof Key for Code Exchange) est une sécurité supplémentaire pour les apps mobiles, mais GitHub OAuth Apps ne le supportent pas — donc on le désactive.
+      clientId,
+      scopes: ["read:user", "user:email"],
+      redirectUri,
       usePKCE: false,
     },
     discovery,
@@ -40,11 +35,14 @@ const useGithubAuth = () => {
   useEffect(() => {
     if (response?.type !== "success") return;
 
+    setIsSigningIn(true);
+
     const signIn = async () => {
       const { code } = response.params;
 
       if (!code) {
         console.error("Missing code");
+        setIsSigningIn(false);
         return;
       }
 
@@ -56,15 +54,13 @@ const useGithubAuth = () => {
             "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "true",
           },
-          body: JSON.stringify({
-            code,
-            redirectUri,
-          }),
+          body: JSON.stringify({ code, redirectUri }),
         });
 
         if (!res.ok) {
           const error = await res.text();
           console.error("Backend error:", error);
+          setIsSigningIn(false);
           return;
         }
 
@@ -72,23 +68,25 @@ const useGithubAuth = () => {
 
         if (!data.token || !data.user) {
           console.error("Missing token or user in backend response");
+          setIsSigningIn(false);
           return;
         }
 
-        // Le backend a vérifié le code GitHub et renvoyé un JWT — on l'enregistre comme session.
         await setSession(data.token, data.user.login);
-
         console.log("GitHub login success:", data.user.login);
-        // router.replace("/home");
+        router.replace("/home" as any);
+        // Pas de setIsSigningIn(false) ici : on laisse le loading affiché
+        // jusqu'à ce que la navigation démonte ce composant.
       } catch (e) {
         console.error("GitHub auth error:", e);
+        setIsSigningIn(false);
       }
     };
 
     signIn();
   }, [response]);
 
-  return { promptAsync, request };
+  return { promptAsync, request, isSigningIn };
 };
 
 export default useGithubAuth;

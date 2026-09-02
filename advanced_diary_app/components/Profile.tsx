@@ -160,22 +160,11 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
 
   useEffect(() => {
-    if (!login) return;
-    if (!localLogin) router.replace("/signin");
-    if (!token) return;
-    fetchCount();
-    fetchStats();
-  }, [localLogin, login, token, entries]);
-
-  useEffect(() => {
-    if (!login) return;
-    if (!localLogin) router.replace("/signin");
-    if (!token) return;
-
+    if (!login || !token) return;
     fetchCount();
     fetchEntries(0, login);
     fetchStats();
-  }, [localLogin, login, token]);
+  }, [localLogin, login, token, entries]);
 
   return (
     <View

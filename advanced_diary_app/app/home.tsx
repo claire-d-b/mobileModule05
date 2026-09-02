@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
-import CBottomNav from "./CBottomNav";
+import CBottomNav from "../components/CBottomNav";
 import * as React from "react";
-import Profile from "./Profile";
-import Agenda from "./Agenda";
-import Entries from "./Entries";
+import Profile from "../components/Profile";
+import Agenda from "../components/Agenda";
+import Entries from "../components/Entries";
 
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 

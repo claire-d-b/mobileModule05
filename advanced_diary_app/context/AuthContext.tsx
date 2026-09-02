@@ -25,12 +25,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const storedToken = await AsyncStorage.getItem("token");
         const storedLogin = await AsyncStorage.getItem("localLogin");
+        console.log("🟦 RESTORE:", { storedToken: !!storedToken, storedLogin });
         if (storedToken) setToken(storedToken);
         if (storedLogin) setLocalLogin(storedLogin);
       } catch (e) {
         console.warn("Failed to restore session", e);
       } finally {
         setLoading(false);
+        console.log("🟦 RESTORE done, loading=false");
       }
     };
     restore();
