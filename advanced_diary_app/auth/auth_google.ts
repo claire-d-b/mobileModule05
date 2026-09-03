@@ -7,7 +7,7 @@ import { router } from "expo-router";
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const useGoogleAuth = () => {
-  const { setSession } = useAuthContext();
+  const { setSession, setAuthenticating } = useAuthContext();
 
   // Garde le dernier access token Google en mémoire, pour pouvoir le révoquer au logout
   const lastAccessTokenRef = useRef<string | null>(null);
@@ -28,7 +28,17 @@ const useGoogleAuth = () => {
   });
 
   useEffect(() => {
-    if (response?.type !== "success") return;
+    if (!response) return;
+
+    // Le retour direct de promptAsync() n'est pas fiable sur Android : le
+    // Custom Tab peut se fermer (dismiss) avant que le vrai deep link
+    // "success" n'arrive. On pilote isSigningIn/authenticating uniquement
+    // depuis ce `response`, jamais depuis la Promise de promptAsync().
+    if (response.type !== "success") {
+      setIsSigningIn(false);
+      setAuthenticating(false);
+      return;
+    }
 
     setIsSigningIn(true);
 
@@ -38,6 +48,7 @@ const useGoogleAuth = () => {
       if (!accessToken) {
         console.error("Missing access token");
         setIsSigningIn(false);
+        setAuthenticating(false);
         return;
       }
       try {
@@ -53,12 +64,14 @@ const useGoogleAuth = () => {
         if (!res.ok) {
           console.error("Backend Google error:", data.error);
           setIsSigningIn(false);
+          setAuthenticating(false);
           return;
         }
 
         if (!data.token || !data.user) {
           console.error("Missing token or user in backend response");
           setIsSigningIn(false);
+          setAuthenticating(false);
           return;
         }
 
@@ -70,20 +83,22 @@ const useGoogleAuth = () => {
         await setSession(data.token, data.user.login);
         console.log("Google login success:", data.user.login);
         router.replace("/home" as any);
+        // On lève authenticating seulement une fois la session posée ET la
+        // navigation lancée : index.tsx a alors un `token` valide et peut
+        // rediriger vers /home directement s'il est re-sollicité entre-temps.
+        setAuthenticating(false);
         // Pas de setIsSigningIn(false) ici : on laisse le loading affiché
         // jusqu'à ce que la navigation démonte le composant appelant.
       } catch (e) {
         console.error("Google auth error:", e);
         setIsSigningIn(false);
+        setAuthenticating(false);
       }
     };
     signIn();
   }, [response]);
 
   // Révoque le token Google côté Google (déconnecte le compte Google associé à cette app).
-  // Note : n'a d'effet que si l'utilisateur s'est connecté via Google pendant cette session
-  // (le token n'est pas persisté après un redémarrage de l'app). Si aucun token n'est en
-  // mémoire, la fonction ne fait rien — ce n'est pas une erreur.
   const signOutGoogle = async () => {
     const accessToken = lastAccessTokenRef.current;
     if (!accessToken) return;
@@ -100,7 +115,24 @@ const useGoogleAuth = () => {
     }
   };
 
-  return { promptAsync, request, signOutGoogle, isSigningIn };
+  // À appeler au clic du bouton : ouvre le navigateur et signale globalement
+  // (via le contexte) qu'une authentification est en cours, pour que
+  // app/index.tsx ne redirige pas vers /signin si le deep link de retour
+  // ramène temporairement l'app sur la route racine.
+  const startGoogleSignIn = () => {
+    if (!request) return;
+    setIsSigningIn(true);
+    setAuthenticating(true);
+    promptAsync();
+  };
+
+  return {
+    promptAsync,
+    request,
+    signOutGoogle,
+    isSigningIn,
+    startGoogleSignIn,
+  };
 };
 
 export default useGoogleAuth;

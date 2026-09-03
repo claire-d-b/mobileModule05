@@ -9,7 +9,7 @@ const discovery = {
 };
 
 const useGithubAuth = () => {
-  const { setSession } = useAuthContext();
+  const { setSession, setAuthenticating } = useAuthContext();
   // true dès que le navigateur OAuth renvoie une réponse "success",
   // jusqu'à ce que le backend ait répondu et la session soit posée.
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -33,7 +33,16 @@ const useGithubAuth = () => {
   );
 
   useEffect(() => {
-    if (response?.type !== "success") return;
+    if (!response) return;
+
+    // Même logique que pour Google : le deep link de retour peut ramener
+    // l'app sur "/" avant la fin de l'appel backend, donc on pilote
+    // isSigningIn/authenticating uniquement depuis ce `response`.
+    if (response.type !== "success") {
+      setIsSigningIn(false);
+      setAuthenticating(false);
+      return;
+    }
 
     setIsSigningIn(true);
 
@@ -43,6 +52,7 @@ const useGithubAuth = () => {
       if (!code) {
         console.error("Missing code");
         setIsSigningIn(false);
+        setAuthenticating(false);
         return;
       }
 
@@ -61,6 +71,7 @@ const useGithubAuth = () => {
           const error = await res.text();
           console.error("Backend error:", error);
           setIsSigningIn(false);
+          setAuthenticating(false);
           return;
         }
 
@@ -69,24 +80,36 @@ const useGithubAuth = () => {
         if (!data.token || !data.user) {
           console.error("Missing token or user in backend response");
           setIsSigningIn(false);
+          setAuthenticating(false);
           return;
         }
 
         await setSession(data.token, data.user.login);
         console.log("GitHub login success:", data.user.login);
         router.replace("/home" as any);
+        setAuthenticating(false);
         // Pas de setIsSigningIn(false) ici : on laisse le loading affiché
         // jusqu'à ce que la navigation démonte ce composant.
       } catch (e) {
         console.error("GitHub auth error:", e);
         setIsSigningIn(false);
+        setAuthenticating(false);
       }
     };
 
     signIn();
   }, [response]);
 
-  return { promptAsync, request, isSigningIn };
+  // À appeler au clic du bouton : ouvre le navigateur et signale globalement
+  // (via le contexte) qu'une authentification est en cours.
+  const startGithubSignIn = () => {
+    if (!request) return;
+    setIsSigningIn(true);
+    setAuthenticating(true);
+    promptAsync();
+  };
+
+  return { promptAsync, request, isSigningIn, startGithubSignIn };
 };
 
 export default useGithubAuth;

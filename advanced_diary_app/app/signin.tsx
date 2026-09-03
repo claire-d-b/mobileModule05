@@ -24,14 +24,14 @@ const SignIn = () => {
   const [error, setError] = useState("");
 
   const {
-    promptAsync: googlePrompt,
     request: googleRequest,
-    isSigningIn: isGoogleSigningIn, // si tu ajoutes le même pattern à useGoogleAuth
+    isSigningIn: isGoogleSigningIn,
+    startGoogleSignIn,
   } = useGoogleAuth();
   const {
-    promptAsync: githubPrompt,
     request: githubRequest,
     isSigningIn: isGithubSigningIn,
+    startGithubSignIn,
   } = useGithubAuth();
   const { setSession } = useAuthContext();
 
@@ -76,7 +76,8 @@ const SignIn = () => {
       setIsLoading(false); // erreur → on réaffiche le formulaire
     }
   };
-  if (isLoading || isGithubSigningIn || isGoogleSigningIn) return <CLoading />;
+
+  if (isLoading || isGoogleSigningIn || isGithubSigningIn) return <CLoading />;
 
   return (
     <View
@@ -166,16 +167,7 @@ const SignIn = () => {
           labelStyle={{}}
         />
         <CButton
-          onPress={() => {
-            setIsLoading(true); // affiche loading avant d'ouvrir le navigateur
-            googleRequest &&
-              googlePrompt().then((result) => {
-                // si l'utilisateur annule ou si ça échoue, on remet isLoading à false
-                if (result?.type !== "success") {
-                  setIsLoading(false);
-                }
-              });
-          }}
+          onPress={startGoogleSignIn}
           msg="Connect with Google"
           variant="text"
           textColor="gray"
@@ -184,15 +176,7 @@ const SignIn = () => {
           labelStyle={{}}
         />
         <CButton
-          onPress={() => {
-            setIsLoading(true);
-            githubRequest &&
-              githubPrompt().then((result) => {
-                if (result?.type !== "success") {
-                  setIsLoading(false);
-                }
-              });
-          }}
+          onPress={startGithubSignIn}
           msg="Connect with Github"
           variant="text"
           textColor="gray"
