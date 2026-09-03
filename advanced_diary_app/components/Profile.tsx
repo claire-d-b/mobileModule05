@@ -164,7 +164,7 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
     fetchCount();
     fetchEntries(0, login);
     fetchStats();
-  }, [localLogin, login, token, entries]);
+  }, [localLogin, login, token]);
 
   return (
     <View
