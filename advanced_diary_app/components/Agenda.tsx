@@ -11,7 +11,7 @@ import { useAuthContext } from "../context/AuthContext";
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const emotions = [
-  "emoticon",
+  "emoticon-excited",
   "emoticon-happy",
   "emoticon-neutral",
   "emoticon-sad",

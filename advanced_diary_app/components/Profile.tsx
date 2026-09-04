@@ -8,11 +8,10 @@ import CChip from "./CChip";
 import CAvatar from "./CAvatar";
 import CDelete from "./CDelete";
 import CViewEntry from "./CViewEntry";
-import useGoogleAuth from "../auth/auth_google";
 import { formatDate } from "../utils/utils";
 
 const emotions = [
-  "emoticon",
+  "emoticon-excited",
   "emoticon-happy",
   "emoticon-neutral",
   "emoticon-sad",

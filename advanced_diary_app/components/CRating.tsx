@@ -12,7 +12,7 @@ interface Props {
 
 const rate = [0, 1, 2, 3, 4];
 const emotions = [
-  "emoticon",
+  "emoticon-excited",
   "emoticon-happy",
   "emoticon-neutral",
   "emoticon-sad",

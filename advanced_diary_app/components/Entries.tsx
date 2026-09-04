@@ -11,7 +11,7 @@ import CButton from "./CButton";
 import { useAuthContext } from "../context/AuthContext";
 
 const emotions = [
-  "emoticon",
+  "emoticon-excited",
   "emoticon-happy",
   "emoticon-neutral",
   "emoticon-sad",
