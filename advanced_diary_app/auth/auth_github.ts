@@ -86,7 +86,7 @@ const useGithubAuth = () => {
 
         await setSession(data.token, data.user.login);
         console.log("GitHub login success:", data.user.login);
-        router.replace("/home" as any);
+        // router.replace("/home" as any);
         setAuthenticating(false);
         // Pas de setIsSigningIn(false) ici : on laisse le loading affiché
         // jusqu'à ce que la navigation démonte ce composant.
@@ -106,7 +106,7 @@ const useGithubAuth = () => {
     if (!request) return;
     setIsSigningIn(true);
     setAuthenticating(true);
-    promptAsync();
+    promptAsync(); // Fonction qui ouvre une fenêtre de navigateur (Custom Tab sur Android, ASWebAuthenticationSession sur iOS) sur l'URL construite à partir de discovery.authorizationEndpoint + les paramètres (clientId, scopes, redirectUri, etc.)
   };
 
   return { promptAsync, request, isSigningIn, startGithubSignIn };

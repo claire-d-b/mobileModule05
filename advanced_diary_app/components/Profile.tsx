@@ -40,8 +40,6 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  const { signOutGoogle } = useGoogleAuth();
-
   const [visibleDialog, setVisibleDialog] = useState(false);
   const showDialog = () => setVisibleDialog(true);
   const hideDialog = () => setVisibleDialog(false);
@@ -148,12 +146,6 @@ const _ = ({ login, entries, fetchEntries }: Props) => {
   };
 
   const logout = async () => {
-    // Révoque uniquement la session côté Google si le hook l'expose (déconnexion du compte Google local à l'appareil)
-    try {
-      await signOutGoogle?.();
-    } catch (e) {
-      console.warn("Google sign-out failed:", e);
-    }
     // Session applicative : uniquement gérée par notre backend/JWT désormais
     await setSession(null, null);
     router.replace("/signin");

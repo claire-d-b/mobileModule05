@@ -52,14 +52,14 @@ const SignIn = () => {
       if (!res.ok) {
         setError(data.error || "Login failed");
         console.error("Login failed:", data.error);
-        setIsLoading(false); // erreur → on réaffiche le formulaire
+        setIsLoading(false); // erreur: on réaffiche le formulaire
         return;
       }
 
       if (!data.token || !data.user) {
         setError("Unexpected server response");
         console.error("Missing token or user in backend response");
-        setIsLoading(false); // erreur → on réaffiche le formulaire
+        setIsLoading(false); // erreur: on réaffiche le formulaire
         return;
       }
 
@@ -68,12 +68,12 @@ const SignIn = () => {
       setLogin("");
       setPassword("");
       router.replace("/home" as any);
-      // pas de setIsLoading(false) — succès → on laisse CLoading affiché
+      // pas de setIsLoading(false) — succès : on laisse CLoading affiché
       // jusqu'à ce que la navigation démonte ce composant
     } catch (e) {
       console.error("Error during login:", e);
       setError("An error occurred");
-      setIsLoading(false); // erreur → on réaffiche le formulaire
+      setIsLoading(false); // erreur: on réaffiche le formulaire
     }
   };
 
@@ -168,6 +168,7 @@ const SignIn = () => {
         />
         <CButton
           onPress={startGoogleSignIn}
+          disabled={!googleRequest}
           msg="Connect with Google"
           variant="text"
           textColor="gray"
@@ -177,6 +178,7 @@ const SignIn = () => {
         />
         <CButton
           onPress={startGithubSignIn}
+          disabled={!githubRequest}
           msg="Connect with Github"
           variant="text"
           textColor="gray"

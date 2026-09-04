@@ -3,6 +3,7 @@ import { GestureResponderEvent } from "react-native";
 
 interface Props {
   onPress: (e: GestureResponderEvent) => void;
+  disabled?: boolean;
   msg: string;
   variant: "text" | "outlined" | "contained" | "elevated" | "contained-tonal";
   textColor: string;
@@ -13,6 +14,7 @@ interface Props {
 
 const _ = ({
   onPress,
+  disabled,
   msg,
   variant,
   textColor,
@@ -23,6 +25,7 @@ const _ = ({
   return (
     <Button
       onPress={onPress}
+      disabled={disabled}
       style={style}
       mode={variant}
       textColor={textColor}

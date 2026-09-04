@@ -64,7 +64,7 @@ const _ = () => {
     if (email && token) fetchEntries(page, email);
   }, [email, token]);
 
-  const [index, setIndex] = React.useState(0);
+  const [index, setIndex] = React.useState(1);
   const [routes] = React.useState([
     {
       key: "home",

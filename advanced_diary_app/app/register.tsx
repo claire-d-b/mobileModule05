@@ -104,7 +104,7 @@ const Register = () => {
 
       console.log("Registration success:", data.user);
       await setSession(data.token, data.user.login);
-      // router.replace("/home" as any);
+      router.replace("/home" as any);
     } catch (e: any) {
       console.error("Network error:", e);
       setError("Network error — backend running?");

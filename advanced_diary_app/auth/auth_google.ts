@@ -82,7 +82,7 @@ const useGoogleAuth = () => {
         // Le backend a vérifié l'accessToken Google et renvoyé un JWT — on l'enregistre comme session.
         await setSession(data.token, data.user.login);
         console.log("Google login success:", data.user.login);
-        router.replace("/home" as any);
+        // router.replace("/home" as any);
         // On lève authenticating seulement une fois la session posée ET la
         // navigation lancée : index.tsx a alors un `token` valide et peut
         // rediriger vers /home directement s'il est re-sollicité entre-temps.
@@ -98,23 +98,6 @@ const useGoogleAuth = () => {
     signIn();
   }, [response]);
 
-  // Révoque le token Google côté Google (déconnecte le compte Google associé à cette app).
-  const signOutGoogle = async () => {
-    const accessToken = lastAccessTokenRef.current;
-    if (!accessToken) return;
-
-    try {
-      await AuthSession.revokeAsync(
-        { token: accessToken },
-        { revocationEndpoint: "https://oauth2.googleapis.com/revoke" },
-      );
-      lastAccessTokenRef.current = null;
-      console.log("Google token revoked");
-    } catch (e) {
-      console.warn("Failed to revoke Google token:", e);
-    }
-  };
-
   // À appeler au clic du bouton : ouvre le navigateur et signale globalement
   // (via le contexte) qu'une authentification est en cours, pour que
   // app/index.tsx ne redirige pas vers /signin si le deep link de retour
@@ -129,7 +112,6 @@ const useGoogleAuth = () => {
   return {
     promptAsync,
     request,
-    signOutGoogle,
     isSigningIn,
     startGoogleSignIn,
   };
