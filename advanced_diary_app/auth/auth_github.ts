@@ -1,7 +1,6 @@
 import * as AuthSession from "expo-auth-session";
 import { useEffect, useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
-import { router } from "expo-router";
 
 const discovery = {
   authorizationEndpoint: "https://github.com/login/oauth/authorize",
@@ -86,7 +85,6 @@ const useGithubAuth = () => {
 
         await setSession(data.token, data.user.login);
         console.log("GitHub login success:", data.user.login);
-        // router.replace("/home" as any);
         setAuthenticating(false);
         // Pas de setIsSigningIn(false) ici : on laisse le loading affiché
         // jusqu'à ce que la navigation démonte ce composant.

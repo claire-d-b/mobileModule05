@@ -55,7 +55,7 @@ const _ = () => {
     }
   };
 
-  // L'email affiché suit désormais uniquement le login local (issu du JWT/backend custom), plus de source Firebase
+  // L'email affiché suit le login local (issu du JWT/backend custom)
   useEffect(() => {
     setEmail(localLogin ?? null);
   }, [localLogin]);

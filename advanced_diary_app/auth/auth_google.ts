@@ -2,7 +2,6 @@ import * as Google from "expo-auth-session/providers/google";
 import * as AuthSession from "expo-auth-session";
 import { useEffect, useRef, useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
-import { router } from "expo-router";
 
 const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -82,7 +81,6 @@ const useGoogleAuth = () => {
         // Le backend a vérifié l'accessToken Google et renvoyé un JWT — on l'enregistre comme session.
         await setSession(data.token, data.user.login);
         console.log("Google login success:", data.user.login);
-        // router.replace("/home" as any);
         // On lève authenticating seulement une fois la session posée ET la
         // navigation lancée : index.tsx a alors un `token` valide et peut
         // rediriger vers /home directement s'il est re-sollicité entre-temps.
