@@ -8,9 +8,6 @@ const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 const useGoogleAuth = () => {
   const { setSession, setAuthenticating } = useAuthContext();
 
-  // Garde le dernier access token Google en mémoire, pour pouvoir le révoquer au logout
-  const lastAccessTokenRef = useRef<string | null>(null);
-
   // true dès que Google renvoie une réponse "success", jusqu'à ce que le
   // backend ait répondu et la session soit posée (ou qu'une erreur survienne).
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -73,9 +70,6 @@ const useGoogleAuth = () => {
           setAuthenticating(false);
           return;
         }
-
-        // On garde l'accessToken Google en mémoire pour pouvoir le révoquer plus tard (logout)
-        lastAccessTokenRef.current = accessToken;
 
         console.log("Google user in DB:", data.user);
         // Le backend a vérifié l'accessToken Google et renvoyé un JWT — on l'enregistre comme session.
